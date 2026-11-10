@@ -1,0 +1,31 @@
+{
+  "counts": {
+    "info": 0,
+    "low": 1,
+    "moderate": 32,
+    "high": 0,
+    "critical": 0,
+    "total": 33
+  },
+  "advisories": [
+    {
+      "package": "deepmerge",
+      "title": "deepmerge mergeObject() allows prototype poisoning of returned objects",
+      "url": "https://github.com/advisories/GHSA-gcqx-w48m-w2h4",
+      "range": ">=4.2.0 <=4.3.1"
+    },
+    {
+      "package": "glob",
+      "title": "Glob: AbortSignal cancellation bypass allows post-timeout filesystem traversal",
+      "url": "https://github.com/advisories/GHSA-3g3m-2fjr-6pw4",
+      "range": ">=9.0.0 <=14.0.1"
+    },
+    {
+      "package": "minimatch",
+      "title": "minimatch has potential denial of service via globparts amplification",
+      "url": "https://github.com/advisories/GHSA-g3hv-75wg-m249",
+      "range": ">=7.0.0 <11.0.1"
+    }
+  ],
+  "forcedFixApplied": false
+}

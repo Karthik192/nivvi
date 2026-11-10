@@ -1,0 +1,27 @@
+{
+  "name": "nivvi",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "overrides": {
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "engines": {
+    "node": "^22.13.0 || ^24.3.0 || ^26.0.0 || >=27.0.0"
+  },
+  "scripts": {
+    "mobile": "npm run start --workspace @nivvi/mobile",
+    "android": "npm run android --workspace @nivvi/mobile",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "format:check": "prettier --check apps/mobile package.json .prettierrc.json",
+    "design:verify": "node design/verify.mjs"
+  },
+  "devDependencies": {
+    "prettier": "3.9.10"
+  }
+}

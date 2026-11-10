@@ -1,0 +1,13 @@
+{
+  "status": "Proposed semantic mapping; not an exported Rive asset or verified runtime binding",
+  "states": {
+    "idle": { "label": "Calm", "event": "screenReady", "riveState": "Calm", "durationMs": 0, "copy": "Here with you. No rush.", "reducedMotion": "calm still" },
+    "celebrate": { "label": "Delighted", "event": "reviewComplete", "riveState": "Delighted", "durationMs": 600, "copy": "You showed up. That deserves a little cheer.", "reducedMotion": "delighted still" },
+    "surprised": { "label": "Curious", "event": "unexpectedChange", "riveState": "Curious", "durationMs": 350, "copy": "Something changed. Let’s take a look together.", "reducedMotion": "curious still" },
+    "saving": { "label": "Saving expense", "event": "saveRequested", "riveState": "Attentive", "durationMs": 0, "copy": "Recording your entry. Success has not been confirmed.", "reducedMotion": "attentive still" },
+    "saved": { "label": "Expense recorded", "event": "storageCommitted", "riveState": "ContentNod", "durationMs": 400, "copy": "One entry recorded. Sync status is shown separately.", "reducedMotion": "content still" },
+    "goal": { "label": "Goal reached", "event": "goalTargetReached", "riveState": "GoalCheer", "durationMs": 700, "copy": "You reached your goal. A little, further.", "reducedMotion": "goal still" },
+    "empty": { "label": "Empty state", "event": "noEntries", "riveState": "Patient", "durationMs": 0, "copy": "A little space to begin. One entry is a lovely start.", "reducedMotion": "patient still" },
+    "attentive": { "label": "Near budget limit", "event": "budgetThresholdCrossed", "riveState": "Supportive", "durationMs": 350, "copy": "You’re close to your planned limit. Take a look when you’re ready.", "reducedMotion": "supportive still" }
+  }
+}

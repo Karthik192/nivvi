@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en-IN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <title>Nivvi — design studio</title>
+    <link rel="icon" href="../assets/app-icon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css">
+    <script type="module" src="gallery.mjs"></script>
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Skip to design preview</a>
+    <header class="studio-header">
+      <a href="#foundation" class="wordmark"><img src="../assets/mark.svg" width="36" height="36" alt="">nivvi<span>DESIGN STUDIO / 01</span></a>
+      <div class="tools" aria-label="Preview settings">
+        <label>Theme <select id="theme"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+        <label>Text <select id="text-scale"><option value="1">100%</option><option value="1.3">130%</option><option value="2">200%</option></select></label>
+        <label class="check"><input type="checkbox" id="reduce-motion"> Reduce motion</label>
+      </div>
+    </header>
+    <nav class="section-nav" aria-label="Design sections"><a href="#foundation">01 / Foundation</a><a href="#components">02 / Components</a><a href="#character">03 / Meet Nim</a><a href="screens.html">04 / App screen mockups →</a></nav>
+    <main id="main" tabindex="-1">
+      <section id="foundation" class="hero section">
+        <div class="hero-copy">
+          <p class="eyebrow">A FRIENDLIER RELATIONSHIP WITH MONEY</p>
+          <h1>Small steps.<br>A little more<br><span>freedom.</span></h1>
+          <p class="intro">A quiet place for your everyday money.<br>A little encouragement along the way.</p>
+          <div class="brand-signature"><img src="../assets/mark.svg" width="48" height="48" alt="Nivvi seed mark"><div><strong>Nivvi</strong><p>A little, further.</p></div></div>
+          <p class="annotation">WORKING BRAND · ORIGINAL VECTOR STUDY<br>Design samples only. Nothing here saves financial records.</p>
+        </div>
+        <div class="phone-surround">
+          <div class="phone" aria-label="Mobile component composition, illustrative sample">
+            <div class="phone-top"><span>9:41</span><span aria-label="Full battery">▰</span></div>
+            <div class="phone-content">
+              <div class="row"><p class="eyebrow">A LITTLE, FURTHER.</p><span class="avatar" aria-label="Sample profile initial">A</span></div>
+              <h2>Your month,<br>at a glance.</h2>
+              <div class="sample-label">Illustrative amounts · November</div>
+              <div id="budget-sample"></div>
+              <div class="companion-card"><div><span class="eyebrow">ONE SMALL WIN</span><p>You made time<br>for your money.</p></div><div id="hero-mascot"></div></div>
+              <div id="navigation-sample"></div>
+              <div id="navigation-content" class="nav-description" aria-live="polite"></div>
+            </div>
+          </div>
+          <div class="little-note">Less noise.<br>More room to grow.<span>↗</span></div>
+        </div>
+      </section>
+      <section class="section foundations-grid" aria-labelledby="palette-heading">
+        <div><p class="eyebrow">01 / THE FEELING</p><h2 id="palette-heading">Grounded. With a spark.</h2><p class="muted">Warm neutrals do the quiet work. Leaf green adds a little optimism. Colour supports meaning; it never carries it alone.</p></div>
+        <div id="palette" class="palette"></div>
+        <div class="type-specimen"><span class="eyebrow">TYPE / MANROPE PROPOSED</span><p class="specimen">Aa ₹ 1,23,456</p><p class="muted">Rounded forms. Clear numbers. System font fallback in this preview; no remote fonts loaded.</p></div>
+        <div class="shape-specimen"><span class="eyebrow">SHAPE / SOFT, NOT SQUISHY</span><div class="shape-row"><span>16</span><span>24</span><span>32</span></div><p class="muted">A 4-point rhythm. Generous touch areas. Depth only where it helps.</p></div>
+      </section>
+      <section id="components" class="section">
+        <div class="section-heading"><div><p class="eyebrow">02 / THE EVERYDAY PIECES</p><h2>Made for the small moments.</h2></div><p class="muted">Reusable browser prototypes.<br>Native components follow in Phase 2.</p></div>
+        <div class="component-grid">
+          <article class="panel"><h3>Actions, with intention</h3><p class="muted">One primary action. Room to breathe.</p><div id="button-samples" class="stack"></div><p id="button-feedback" class="feedback" role="status">Try an enabled button to see feedback.</p></article>
+          <article class="panel"><h3>A field that helps</h3><p class="muted">Labels stay visible. Errors say what to fix.</p><form id="sample-form" novalidate><div id="input-samples"></div><button class="button primary" type="submit">Check sample field</button><p id="form-feedback" class="feedback" role="status">Preview validation only; no data is stored.</p></form></article>
+          <article class="panel"><h3>A category, clearly</h3><p class="muted">A shared silhouette and a readable label.</p><div id="category-samples" class="category-grid"></div><p id="category-feedback" class="feedback" role="status">Food selected in this preview.</p></article>
+          <article class="panel"><h3>Feedback you can trust</h3><div id="status-samples" class="stack"></div></article>
+          <article class="panel"><h3>Space for a fresh start</h3><div class="empty-state"><img src="../assets/empty-pot.svg" width="100" height="100" alt=""><h4>A little space to begin.</h4><p class="muted">Your first entry will go here.<br>One is a lovely start.</p><button type="button" id="empty-action" class="button secondary">Preview first-entry hint</button><p id="empty-feedback" role="status" class="feedback"></p></div></article>
+          <article class="panel"><h3>Progress, without pressure</h3><div id="goal-sample"></div><label class="range-label" for="progress">Sample goal progress <output id="progress-value">40%</output></label><input type="range" id="progress" min="0" max="100" step="5" value="40"><p class="muted">Explore milestones. Values are illustrative, with no account or savings attached.</p></article>
+        </div>
+      </section>
+      <section id="character" class="section character-section">
+        <div><p class="eyebrow">03 / YOUR LITTLE COMPANION</p><h2>Meet Nim.<br>Small seed. Big heart.</h2><p class="muted">Curious, patient, quietly delighted by your effort. Nim celebrates showing up — never judges what you spend. Explore proposed saving, recorded, goal, empty and near-limit states below.</p><div id="pose-picker" class="pose-picker" role="group" aria-label="Nim expression"></div><p class="annotation">STATIC VECTOR POSES · NOT RIVE ANIMATION<br>Original .riv authoring and native compatibility remain gates.</p></div>
+        <div class="character-stage"><div id="mascot-stage"></div><p id="pose-description" role="status"></p></div>
+      </section>
+      <footer class="section footer"><span>nivvi / A little, further.</span><p>Phase 1 · Brand & component study<br>Working name; trademark and store availability not cleared.</p></footer>
+    </main>
+    <p id="load-error" role="alert" hidden>Preview could not load. Run node design/preview/server.mjs and open http://127.0.0.1:4173.</p>
+  </body>
+</html>

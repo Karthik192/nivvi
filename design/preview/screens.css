@@ -1,0 +1,90 @@
+.screen-review { max-width: 1100px; padding: var(--space-8) var(--space-6); }
+.study-intro { max-width: 780px; margin-bottom: var(--space-10); }
+.study-intro h1 { font-size: 2.75rem; line-height: 1.12; }
+.study-intro p, .study-intro li { font-size: 1rem; }
+.study-links { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); }
+.study-links a { min-height: 48px; display: inline-flex; align-items: center; }
+.screen-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-10) var(--space-8); align-items: start; }
+.screen-figure { margin: 0; min-width: 0; }
+.screen-figure figcaption { font-size: 1rem; font-weight: 650; margin-bottom: var(--space-4); }
+.app-device { width: 390px; height: 844px; max-width: 100%; border-radius: 28px; background: var(--canvas); color: var(--ink); box-shadow: 0 0 0 2px var(--outline), var(--shadow); display: flex; flex-direction: column; position: relative; isolation: isolate; }
+.app-device .system-bar { flex: 0 0 auto; display: flex; justify-content: space-between; padding: 12px 24px 8px; font-size: .875rem; font-weight: 600; }
+.app-header { flex: 0 0 auto; padding: 8px 24px 12px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.app-header .eyebrow { margin: 0; letter-spacing: .06em; }
+.app-header img { width: 28px; height: 28px; }
+.app-scroll { flex: 1 1 auto; overflow-y: auto; min-height: 0; padding: 8px 24px 24px; scrollbar-width: thin; scrollbar-color: var(--outline) transparent; border-radius: 0 0 28px 28px; }
+.app-scroll:focus-visible { outline-offset: -4px; }
+.app-device p, .app-device li, .app-device input, .app-device select, .app-device textarea { font-size: 1rem; line-height: 1.5; }
+.app-device h2 { font-size: 1.75rem; margin-bottom: 8px; }
+.app-device h3 { font-size: 1.125rem; margin-bottom: 8px; }
+.app-device .support, .app-device .field-hint, .app-device .field-error, .app-device .card-detail, .app-device .card-label, .app-device .status p { font-size: .875rem; line-height: 1.5; }
+.app-device .support { color: var(--muted); margin-bottom: 16px; }
+.app-device .card-amount { font-size: 2.125rem; line-height: 1.2; margin-bottom: 16px; }
+.app-device .progress-card { padding: 20px; }
+.app-device .card-detail { margin-bottom: 0; }
+.app-device .feature-card p { color: inherit; }
+.app-device .button { font-size: 1rem; }
+.app-device .app-nav { flex: 0 0 auto; margin: 0; padding: 8px 12px 12px; border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; background: var(--surface); border-radius: 0 0 28px 28px; }
+.app-device .app-nav a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 56px; text-decoration: none; padding: 8px 4px; font-size: .875rem; line-height: 1.4; color: var(--muted); border-radius: 16px; overflow-wrap: anywhere; text-align: center; }
+.app-nav svg { width: 24px; height: 24px; }
+.app-device .app-nav [aria-current="page"] { color: var(--onAccent); background: var(--accent); }
+.app-section { margin-top: 24px; }
+.mini-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-block: 16px; }
+.mini-stats div { background: var(--surface); padding: 16px; border-radius: 16px; }
+.mini-stats span { display: block; font-size: .875rem; color: var(--muted); }
+.mini-stats strong { display: block; font-size: 1.125rem; font-variant-numeric: tabular-nums; margin-top: 4px; overflow-wrap: anywhere; }
+.nim-message { display: flex; gap: 12px; align-items: center; background: var(--raised); border-radius: 20px; padding: 12px 16px; margin-block: 16px; }
+.nim-message .mascot { width: 72px; flex: 0 0 72px; }
+.nim-message p { margin: 0; font-size: .875rem; }
+.nim-message strong { display: block; font-size: 1rem; margin-bottom: 4px; }
+.transaction-list { list-style: none; padding: 0; margin: 0; }
+.transaction-item { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding-block: 16px; border-bottom: 1px solid var(--line); }
+.transaction-icon { width: 40px; height: 40px; border-radius: 14px; background: var(--peach); color: var(--onPeach); display: grid; place-items: center; }
+.transaction-icon svg { width: 24px; height: 24px; }
+.transaction-copy strong { display: block; font-size: 1rem; line-height: 1.4; overflow-wrap: anywhere; }
+.transaction-copy span { display: block; font-size: .875rem; line-height: 1.5; color: var(--muted); }
+.transaction-amount { font-size: 1rem; font-weight: 650; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.app-device .field { margin-block: 16px; }
+.app-device .field input, .app-device select, .app-device textarea { width: 100%; min-width: 0; min-height: 56px; padding: 12px 16px; border: 1px solid var(--outline); border-radius: 16px; background: var(--surface); color: var(--ink); }
+.app-device .field input[aria-invalid="true"] { border: 2px solid var(--danger); }
+.app-device textarea { min-height: 88px; resize: vertical; }
+.app-device .amount-input { font-size: 2rem; font-weight: 650; letter-spacing: -.04em; }
+.app-device fieldset { border: 0; margin: 16px 0; padding: 0; min-width: 0; }
+.app-device legend { font-size: .875rem; font-weight: 600; margin-bottom: 8px; }
+.expense-categories { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.expense-categories label { display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; min-height: 80px; border: 1px solid var(--outline); border-radius: 16px; background: var(--surface); padding: 12px 4px; font-size: .875rem; text-align: center; cursor: pointer; overflow-wrap: anywhere; }
+.expense-categories input { width: 18px; height: 18px; accent-color: var(--primary); margin: 0; }
+.expense-categories label:has(:checked) { background: var(--accent); color: var(--onAccent); border: 2px solid var(--primary); padding: 11px 3px; }
+.expense-categories svg { width: 24px; height: 24px; }
+.full-width { width: 100%; }
+.app-feedback { font-size: .875rem; margin: 16px 0 0; color: var(--positive); }
+.app-feedback[data-kind="error"] { color: var(--danger); }
+.save-preview { margin-top: 16px; }
+.history-filter { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.history-filter .button { font-size: .875rem; padding-inline: 16px; }
+.history-filter [aria-pressed="true"] { background: var(--accent); color: var(--onAccent); box-shadow: inset 0 0 0 2px var(--primary); }
+.history-empty { padding: 24px 0; }
+.chart { background: var(--surface); border-radius: 24px; padding: 20px; margin-top: 20px; }
+.chart-bars { display: flex; gap: 16px; align-items: flex-end; height: 136px; border-bottom: 1px solid var(--outline); padding: 12px 8px 0; }
+.chart-bar { flex: 1; background: var(--primary); border-radius: 8px 8px 0 0; }
+.chart-days { display: flex; justify-content: space-between; font-size: .875rem; margin-top: 8px; color: var(--muted); }
+.chart-table { width: 100%; border-collapse: collapse; font-size: .875rem; margin-top: 16px; }
+.chart-table caption { text-align: left; font-size: .875rem; color: var(--muted); padding-bottom: 8px; }
+.chart-table th { text-align: left; font-weight: 500; }
+.chart-table td { text-align: right; font-variant-numeric: tabular-nums; }
+.chart-table th, .chart-table td { padding-block: 8px; border-bottom: 1px solid var(--line); }
+.category-breakdown { padding: 0; list-style: none; }
+.category-breakdown li { margin-block: 16px; }
+.category-breakdown .row { margin-bottom: 8px; font-size: 1rem; flex-wrap: wrap; }
+.category-breakdown .progress-track { height: 6px; }
+.comparison-note { padding: 16px; background: var(--positiveSurface); color: var(--positive); border-radius: 16px; }
+.review-feedback { padding: 20px; margin-block: 32px; background: var(--raised); border-radius: 16px; }
+html[data-text-scale="2"] .app-device .mini-stats { grid-template-columns: minmax(0, 1fr); }
+html[data-text-scale="2"] .transaction-item { grid-template-columns: 40px minmax(0, 1fr); }
+html[data-text-scale="2"] .transaction-amount { grid-column: 2; white-space: normal; }
+html[data-text-scale="2"] .expense-categories { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+html[data-text-scale="2"] .nim-message { align-items: flex-start; }
+html[data-text-scale="2"] .app-device .app-nav { grid-template-columns: minmax(0, 1fr); }
+html[data-text-scale="2"] .app-device .app-nav a { flex-direction: row; gap: 12px; }
+@media (max-width: 880px) { .screen-grid { grid-template-columns: minmax(0, 1fr); justify-items: center; } .screen-figure { max-width: 100%; } }
+@media (max-width: 440px) { .screen-review { padding-inline: 12px; } .app-scroll { padding-inline: 16px; } .app-header { padding-inline: 16px; } }

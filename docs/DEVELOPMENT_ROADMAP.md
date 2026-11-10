@@ -1,0 +1,40 @@
+# Development roadmap and approval gates
+
+Status: Phases 0 and 1 approved; Phase 2 foundation implemented and verified on Android Emulator, awaiting approval. Original Rive animation acceptance remains outstanding. See PHASE_2_REVIEW.md. Phase 3 is not authorized.
+No estimated delivery dates until scope, assets and target test hardware are agreed.
+Every phase ends with relevant tests, lint/type checks where applicable, implementation inspection, issue fixes, documentation updates, a concise report and explicit approval. Never proceed automatically. Never claim an emulator/device/build check ran when it did not.
+
+| Phase | Deliverable and acceptance gate |
+| --- | --- |
+| 0 — Discovery | Architecture, entity/ownership and financial rules, REST/auth/sync contracts, navigation/motion/widget design, risks and this roadmap. Inspect documentation and local links; no application code, installs or application tests. User approves proposal. |
+| 1 — Brand/design | Propose original name/mascot without claiming trademark clearance; semantic colour/type/space/radius/elevation tokens, intentional light/dark themes, accessible buttons/cards/inputs/navigation and component-state previews. Choose mockup/component-preview tooling explicitly; avoid prematurely bootstrapping Phase 2. Define token format usable by later RN components, font licences and Rive artboard/binding/still specifications. Check contrast, small screens, large text, focus/disabled/loading/error states and reduced motion. User approves visual direction. |
+| 2 — Mobile foundation | Record exact compatibility matrix first; initialize Expo/TypeScript/Router, token styling, themes, Reanimated, gestures, Rive adapter/static fallback, dev/prod environment and navigation shell. Native development build runs in Android emulator. Confirm Rive/Nitro pairing with a minimal valid licensed asset or document asset blocker honestly. Lint/type checks and foundation smoke tests pass. User approves foundation. |
+| 3 — Interactive mock UI | Build onboarding/auth, Home, expense/income/refund entry, history/detail, categories, budgets, goals, insights and settings against explicit mock repository. Every control works or is clearly unavailable; no screenshot UI. Validate forms, drafts, loading/empty/error/offline-not-yet-supported states, navigation, TalkBack and themes. Mock data never ships as production ledger. User approves flows. |
+| 4 — Backend/database | Choose compatible Node/Prisma/PostgreSQL versions, migrations/default categories, auth and email jobs, owned CRUD, reporting, errors, structured redacted logging, rate limits, OpenAPI and automated tests. Add row versions/idempotency/change-log hooks now; sync endpoints wait for Phase 6. Exercise a real test PostgreSQL, migrations, constraints, ownership, token replay and concurrent money rules. User approves API. |
+| 5 — Integration | Replace mock adapter with live API, real auth and records; preserve drafts on failure, serialize refresh, prevent duplicate submissions, invalidate projections correctly. Optimistic visuals only where rollback is clear. Offline saves explicitly not claimed yet. Verify device/emulator-to-API connectivity without hardcoded secrets, actual database changes, logout and expired sessions. User approves connected product. |
+| 6 — Offline | Implement SQLite migrations/encryption, repository/outbox, sync endpoints/bootstrap/cursor/retention, retry/conflicts/statuses and process-death recovery. Transactions/refunds offline writable; categories/budgets/goals cached read-only offline. Verify airplane mode/restart, repeated sends, in-flight edits, conflicting devices, cursor expiry, deleted references, account switching and lost refresh response. User approves durability evidence. |
+| 7 — Android widget | Implement isolated Kotlin/Glance module, private inbox, direct quick-entry Activity, category choice, summary snapshot, save handoff, pending/freshness/privacy states and account invalidation. Test emulator AND real Android device including killed JS process, reboot, launcher resize, rapid taps and logout races. Device unavailable means acceptance remains incomplete. User approves widget. |
+| 8 — Experience polish | Improve motion, real Rive assets where available, counters/charts/sheets, haptics and feedback. Profile a production-like build on agreed mid-range hardware. Verify reduced motion and interaction speed; publish measurements rather than declaring smoothness by inspection. User approves experience. |
+| 9 — QA/security | Broaden regression, UI, isolation, offline and widget tests; review secrets, storage, logs, passwords, sessions, rate limits, least-privilege DB, dependency support and accessibility. Document findings and residual risk; no security-certification claim. User approves release candidate and known issues. |
+| 10 — Release | Prepare production configuration, migration/rollback/backup/restore runbooks, backend deploy plan, signed Android artifact, installation tests and Play Store preparation. Deployment/publishing is a separate explicit approval after concrete artifacts are reviewable; secure handling of signing credentials. Verify restore and data retention. |
+
+## Cross-phase work discipline
+
+The user's Phase 0 review is binding: keep repository/sync abstractions small in Phases 2–6; verify actual native Rive compatibility and secure original `.riv` assets in Phases 1–2; evaluate email-verification friction per sensitive action in Phase 4; distinguish local widget saves from server sync in Phase 7; measure launch and motion on a real mid-range Android phone in Phase 8.
+
+- Test important business logic when first added, not only in Phase 9. Run focused checks, then required build/lint/type checks. Do not install testing infrastructure merely to validate Markdown.
+- Every dependency addition includes official version/peer checks, rationale and lockfile update. Recheck compatibility before native changes even if an older matrix passed.
+- Keep a phase closeout with files changed, actual commands/results, failures, limitations, outstanding issues and approval requested. Distinguish not run, blocked, passed and not applicable.
+- Meaningful Git commits are desired once version control exists and the user authorizes them. Do not initialize, commit, push or publish as an incidental part of Phase 0. No Git repository was present at initial inspection.
+- Maintain decision notes in ARCHITECTURE.md as evidence changes. Explain any replacement of an approved architecture before making it. Never erase working features silently.
+- No schedules or feature claims depend on fabricated original artwork, a non-existent `.riv` file or untested platform capabilities.
+
+## Phase 0 review record
+
+Initial inspection found an empty workspace and no Git repository or existing application. `rg` is unavailable; PowerShell filesystem commands were used. No scoped AGENTS.md was found in the workspace or checked ancestor paths. Only the five requested Markdown deliverables are introduced.
+
+Checked current official Expo, Rive, Android, Prisma and OWASP documentation; sources are linked in ARCHITECTURE.md. Identified critical constraints: native development builds, current Rive runtime migration, constrained widget input, secure token rotation, financial conflict rules and sync cursor commit ordering.
+
+Validation: inspect all five deliverables, required headings, local Markdown links and balanced code fences. Application tests, linting, type checking and emulator execution are not applicable: there is no application or toolchain yet. Exact package compatibility remains unverified until the selected combination is built in Phase 2 (backend combination in Phase 4). No dependencies were installed.
+
+Architecture/defaults were approved with the review recommendations recorded above. Subsequent decisions include original brand, exact SDK/package pins, art authoring, email provider, hosting/region and final production retention. Phase 1 output is documented in DESIGN_SYSTEM.md and RIVE_ASSET_SPEC.md; its final validation record belongs in PHASE_1_REVIEW.md. Wait for explicit approval before Phase 2.
