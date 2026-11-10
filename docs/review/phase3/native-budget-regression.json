@@ -1,0 +1,7 @@
+﻿{
+    "section":  "budget-regression",
+    "status":  "passed",
+    "checks":  [
+                   "Budget allocation validation and unsaved navigation on native Android"
+               ]
+}

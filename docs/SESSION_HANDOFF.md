@@ -1,58 +1,40 @@
-# Session handoff — 10 November 2026
+# Session handoff — Phase 3
 
-## Current status — supersedes the historical pause notes below
+## Current state
 
-The user resumed Phase 2. The font-scale config plugin was rebuilt and installed successfully (7m26s, 537 tasks). It removes the Router linking warning. A follow-up fix sizes the tab bar from actual label heights and safe-area insets; the final 200% capture has readable, unclipped tab labels. Native checks passed for navigation, both themes, progress, reduced motion, live font enlargement/shrinkage, tab-bar growth and retained progress state, with no ReactNativeJS/AndroidRuntime errors for the tested process. All six tests, TypeScript, lint (including the plugin), formatting, 52 design contrast checks and the final Android/Hermes export passed. See docs/PHASE_2_REVIEW.md and docs/review/phase2/smoke-results.json for current evidence.
+Phase 3 interactive frontend is implemented. Review docs/PHASE_3_REVIEW.md and docs/review/phase3/README.md for actual validation and limitations. Stop for explicit Phase 4 approval. Do not implement backend, real authentication, SQLite, synchronization, widgets or deployment under this phase.
 
-**Await explicit Phase 3 approval.** No further Phase 2 fix is pending for font scaling. Original `.riv` rendering/bindings, TalkBack speech and real-phone performance are still unverified; do not claim them. The prior APK hash and warning screenshot mentioned below have been superseded in the review. Metro session 91730 / node PID 18652 and emulator-5554 may remain available; inspect current processes before reusing IDs. Font scale was restored to 1.0. Do not execute the old resume steps below as if work were still paused.
+The product routes cover onboarding/auth previews, Home, expenses/income/refunds, History, details, categories, budgets, goals, Insights, profile and settings. Existing Studio/Motion demonstrations remain under Preview tools. All records and credentials are explicitly a development preview; records are in memory and reset on restart/sign-out. Passwords are transient and never sent or retained. Production routes are guarded by __DEV__ and production initialization does not seed fixtures. This is not a real authentication boundary.
 
-## Historical pause notes
+No dependency was added. Preserve the five user recommendations in CLAUDE.md. Original .riv assets remain absent; original static Nim is the implemented fallback. Native Rive registration/build compatibility does not establish rendering or binding acceptance.
 
-The user asked to continue in a later session. Stop work until resumed. Only Phase 2 is authorized; do not start Phase 3. Phase 2 is not yet closed.
+## Verification and fixes
 
-## Delivered and checked
+Phase 3 ended with 34 Jest tests. The later Windows CMake build fix adds three plugin regression cases: the current total is 37 tests across four suites, with strict TypeScript, ESLint and Prettier passing. Phase 3's 52 design contrast checks, Expo Doctor 20/20 and Expo dependency checks passed; these are the prior design/dependency results. See the review for export and native section results; failed historical/full-run results are not passing acceptance.
 
-- Expo SDK 58 native foundation in `apps/mobile`; one npm workspace/lockfile, TypeScript, Router, StyleSheet tokens from the existing design, Manrope, light/dark/system themes, in-memory Zustand preferences, reusable accessible components, Studio/Motion/Settings and About.
-- Reanimated/Gesture Handler work on Android. Checked Rive/Nitro versions compile and native registration loads, but no original `.riv` exists; original static Nim remains the actual behavior. Do not claim animation acceptance.
-- Type checking, ESLint, six Jest tests, formatting, 52 contrast checks and final Android/Hermes export passed before the latest font-scale config-plugin edit. Recheck relevant checks after that edit.
-- Previous native APK built successfully (7m30s/537 tasks), installed and rendered on Pixel_7 API 34 x86_64 emulator. `scripts/android-smoke.ps1` passed navigation, About/back, themes, progress 40→80%, reduced-motion assertions and captured actual system `font_scale=2.0`.
-- Audit: 33 findings (1 low, 32 moderate), no high/critical; Expo Doctor 19/20 with unsuppressed native/config warning in this non-Git workspace. See compatibility/review docs.
-- No backend, financial storage, SQLite/sync abstractions, widget, commits, deployment or publishing. Preserve five user recommendations in CLAUDE.md.
+Android physical Back bypassed JS with predictive-back enabled on the API 34/target 36 combination. app.config.ts now uses Expo's default false, and a new APK was built/installed (7m22s, 537 tasks). Header Back, cancellation, hardware Back and deep-link regression passed on that APK. Root/index and Home anchors preserve deep-link return destinations. No node_modules patch was made. Android 16 gesture behavior remains unverified.
 
-## Current blocking defect and unverified fix
+Expense Save is fixed below the scrollable form; category choices use two columns. Budget validation is repeated beside Save; the native driver hides the keyboard before asserting it. Goal contribution feedback is shown beside its action. Archived category names stay reserved; restoration reuses the category ID. History prioritizes visible entries/search; detailed filters and month navigation expand on demand. The final native layout regression passed filters/search/Add entry and settled enlarged-text captures. System font scale was restored to 1.0.
 
-Live `adb shell settings put system font_scale 2.0` causes Android activity recreation and Expo Router's development error: "Looks like you have configured linking in multiple places." Text reflows but the warning overlays the screenshot. A clean launch has no warning; changing font scale reproduces it. Never describe `studio-system-font-200.png` as clean acceptance.
+TalkBack speech/focus review, real mid-range device launch/frame measurements, original Rive animation and native release execution remain unverified. Existing dependency advisories remain 33 (one low, 32 moderate, zero high/critical); no production-readiness claim.
 
-The generated MainActivity manifest configChanges omitted `fontScale`. Installed RN ReactDelegate forwards configuration changes to ReactHost; Router's `useLinking.native.js` tracks roots in a module-level array and warns on overlap. Working diagnosis: activity recreation overlaps Router roots. Added `apps/mobile/plugins/with-font-scale.cjs`, registered in `app.config.ts`, to append `fontScale` while preserving all existing flags. This is a proposed fix, **not verified**. It uses existing `expo/config-plugins`, no dependency addition or node_modules edits. Must verify live font updates and useWindowDimensions/tab sizing still work; do not mask warnings or cap text scaling.
+## Local tooling
 
-`expo prebuild --platform android --no-install` succeeded after plugin addition. It regenerated ignored native files. The following Gradle rebuild was interrupted with Ctrl+C for the user pause; exit 1, no final success. Rebuild/install before testing. Previous installed APK and recorded hash predate the plugin. Update review evidence/hash after verified success.
+The user upgraded Android Studio to 2026.2.2 at C:\Program Files\Android\Android Studio, resolving the earlier Panda 3/AGP 9.2.1 IDE incompatibility. Studio's default C:\Users\KARTHIK\.gradle cache lacked the CMake override in the old .local/gradle cache, so its ARM64 build selected Ninja from CMake 3.22.1 and hit the Windows path limit. The new with-windows-cmake.cjs config plugin writes android.cmakeVersion=4.1.2 into generated project properties only on Windows. CMake 4.1.2/Ninja 1.12.1 is already installed; Windows LongPathsEnabled is already 1. No registry, dependency or AGP version changes were made. Prebuild regenerated the ignored Android tree and local.properties was restored. The new native manifest retains fontScale, allowBackup=false and predictive-back opt-out. ARM64 assembleDebug passed using Studio's default Gradle cache: 9m24s, 537 tasks (511 executed, 26 up-to-date), including the previously failing app:buildCMakeDebug[arm64-v8a] task. APK verification confirms lib/arm64-v8a/libappmodules.so. This fix did not install the APK or retest UI on a physical device. Evidence: docs/review/phase3/native-build-arm64-cmake.json. In Studio, sync Gradle before Run.
 
-## Resume steps
+Workspace: D:\\Projects\\expense-tracker. Node 22.14, npm 10.9. Android SDK is under %LOCALAPPDATA%\\Android\\Sdk. JBR is D:\\Program Files\\Android\\Android Studio\\jbr. Gradle cache is .local/gradle and selects CMake 4.1.2/Ninja 1.12.1 for Windows long paths. Preserve caches; non-destructive builds work.
 
-1. Read CLAUDE.md and docs/PHASE_2_REVIEW.md. Inspect plugin/config and generated manifest. Format plugin and check idempotent manifest handling; run relevant checks.
-2. Rebuild debug x86_64 APK with the local environment below. Install via adb. Do not recursively clean generated caches: an optional cleanup previously failed automatic review and was not performed; non-destructive builds work.
-3. Start Metro and wait until ready before launching. Use adb reverse, the development-client launcher URI from `scripts/android-smoke.ps1`, and real native UI checks. Verify live font scale changes in both directions, no warning, retained navigation, readable/reflowing controls and tabs. Actual Android 14 font scaling is nonlinear; `2.0` is the setting, not a promise of exactly doubled pixels.
-4. Strengthen smoke script to fail on Router/LogBox errors; current assertions alone pass even when the warning is present. Refresh dark and 200% captures only after actual acceptance. Current captures are in docs/review/phase2; regular light/dark/motion/settings captures are clean, 200% contains the warning.
-5. Correct provisional status language in MOBILE_FOUNDATION.md, ARCHITECTURE.md and compatibility docs as needed; final Phase 2 review must distinguish pending original Rive/TalkBack/device performance from passed checks. Stop for approval before Phase 3.
+Latest physical-phone run (10 November, 22:30): Metro is on localhost:8081 in session 68657 (Node PID 34692), with two workers. The prior session 85249 was stopped. The connected I2220 phone initially displayed Expo's DevLauncher. USB adb reverse was configured, but loading stalled; restarting Metro with --clear and cold-launching the client recovered product onboarding (fresh bundle: 31.8 seconds). Using sample preview credentials displayed Home and Add Expense on the phone. No app source, persistent data or phone system settings were changed. This is a physical launch/navigation check, not a release performance, TalkBack or Rive acceptance result. Android Studio 2026.2.2 is installed at C:\Program Files\Android\Android Studio; emulator-5554 may also remain connected. Inspect current processes/devices before reusing IDs. Do not start duplicate Metro or overlapping UIAutomator drivers.
 
-## Local commands and tooling
+The Studio launch initially exposed an Expo EventEmitter startup error when reopening the existing development client. Restarting Metro with --clear and cold-launching the client recovered onboarding; the fresh process had no ReactNativeJS/AndroidRuntime errors. No application source/dependency changes were made. An ignored android/local.properties now supplies the installed SDK path. Studio was launched with JAVA_HOME, ANDROID_HOME and GRADLE_USER_HOME set to the existing workstation paths/cache. Gradle sync completion inside Studio was not independently verified.
 
-```powershell
-$env:JAVA_HOME = 'D:\Program Files\Android\Android Studio\jbr'
-$env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
-$env:GRADLE_USER_HOME = 'D:\Projects\expense-tracker\.local\gradle'
-# From apps/mobile/android:
-.\gradlew.bat app:assembleDebug '-PreactNativeArchitectures=x86_64' '-PreactNativeDevServerPort=8081' --console=plain
-# From apps/mobile:
-npx expo start --dev-client --port 8081 --localhost
-# From workspace root, once Metro is ready:
-.\scripts\android-smoke.ps1
-```
+From apps/mobile: npx expo start --dev-client --port 8081 --localhost. Final exports are in ignored apps/mobile/dist/phase3-final; run node scripts/verify-preview-build.mjs apps/mobile/dist/phase3-final from the workspace to verify static production guards.
+From the workspace: scripts/android-phase3-smoke.ps1 supports all/auth/ledger/planning/states/captures/session. scripts/android-phase3-back.ps1 is the focused unsaved-navigation regression; scripts/android-phase3-layout.ps1 covers final History controls and captures. The latest combined run retains a scroll assertion failure after five core groups passed; focused states/captures/session/layout reruns passed. A concurrent-export input ANR is documented, with no established root cause; do not claim a clean performance certification. Phase 2's android-smoke.ps1 is historical for commit 1283f69.
 
-JBR 21 starts Gradle; its plugin provisions a JDK 17 toolchain. SDK CMake 4.1.2/Ninja 1.12.1 is required here for Windows long C++ paths and selected in ignored `.local/gradle/gradle.properties`; source template is scripts/gradle-windows.properties.example. OS long paths were already enabled; no registry changes.
+Current APK: apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk (ignored), rebuilt for ARM64 during the Windows CMake fix; see native-build-arm64-cmake.json for size/hash. It needs Metro. The earlier 104692784-byte x86_64 APK with SHA256 143BC378EC9E7E56F75384A73F936DB0B8AA161BEDB0604B10E5B36B387B09B4 is historical; rebuild with -PreactNativeArchitectures=x86_64 when an emulator APK is needed.
 
-Metro excludes `.local` from crawling/watching while preserving Expo defaults. All blockList regex flags must match; adding `i` only to the custom pattern breaks export. Final export passed after removing that flag. Generated expo-env.d.ts is ignored by Git/Prettier.
+## Version control and communication
 
-ADB: `%LOCALAPPDATA%\Android\Sdk\platform-tools\adb.exe`, device emulator-5554. Existing Pixel_7 emulator was started headless. Metro session 32194 / node PID 32628 may still be running on port 8081; inspect before starting duplicates. Earlier process IDs can expire; never broadly kill Java/Node processes. Native rebuild session 3032 was interrupted. Android font scale was restored to 1.0 by smoke finally block.
+Remote: https://github.com/Karthik192/nivvi.git, main. Last published commit before Phase 3: 1283f69. The user subsequently authorized pushing all current changes, including Phase 3, Windows build fixes and the illustrated technology PDF. Check Git for the resulting commit and remote status. This publication does not authorize Phase 4. User-created .idea files were preserved and ignored; temporary PDF renders are also ignored. Do not delete unrelated work.
 
-The authorized fixed completion notification is documented in CLAUDE.md. It does not mean Phase 2 is finished. No automatic hook installation has been claimed.
+The fixed completion notification is authorized in CLAUDE.md and should run once after completing a task. This does not install an automatic hook. Always finish with the current phase review and approval gate.

@@ -1,0 +1,8 @@
+﻿{
+    "section":  "states",
+    "error":  "App runtime error visible in native UI.",
+    "status":  "failed",
+    "checks":  [
+
+               ]
+}

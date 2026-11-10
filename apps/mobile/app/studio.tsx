@@ -1,13 +1,13 @@
 import { useRef, useState, type ComponentRef } from 'react';
 import { router } from 'expo-router';
 import { View, type TextInput } from 'react-native';
-import { Screen } from '../../src/components/ui/Screen';
-import { AppText } from '../../src/components/ui/AppText';
-import { Card } from '../../src/components/ui/Card';
-import { Button } from '../../src/components/ui/Button';
-import { Input } from '../../src/components/ui/Input';
-import { Notice } from '../../src/components/ui/Notice';
-import { Mascot } from '../../src/components/brand/Mascot';
+import { Screen } from '../src/components/ui/Screen';
+import { AppText } from '../src/components/ui/AppText';
+import { Card } from '../src/components/ui/Card';
+import { Button } from '../src/components/ui/Button';
+import { Input } from '../src/components/ui/Input';
+import { Notice } from '../src/components/ui/Notice';
+import { Mascot } from '../src/components/brand/Mascot';
 
 export default function StudioScreen() {
   const inputRef = useRef<ComponentRef<typeof TextInput>>(null);
@@ -16,6 +16,11 @@ export default function StudioScreen() {
   const [feedback, setFeedback] = useState('');
   return (
     <Screen>
+      <Button
+        label="Back to preview tools"
+        variant="quiet"
+        onPress={() => router.replace('/preview-tools')}
+      />
       <View style={{ gap: 8 }}>
         <AppText variant="label" colour="muted">
           NIVVI / MOBILE FOUNDATION

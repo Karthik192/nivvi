@@ -12,3 +12,5 @@ apps/mobile/ios/
 apps/mobile/expo-env.d.ts
 *.jks
 *.keystore
+.idea/
+tmp/pdfs/

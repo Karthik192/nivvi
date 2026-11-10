@@ -1,0 +1,11 @@
+﻿{
+    "requiresMetro":  true,
+    "architecture":  "x86_64",
+    "kind":  "development-debug",
+    "device":  "Pixel_7 API34",
+    "installation":  "passed",
+    "originalRiveAssetTested":  false,
+    "sha256":  "143BC378EC9E7E56F75384A73F936DB0B8AA161BEDB0604B10E5B36B387B09B4",
+    "bytes":  104692784,
+    "build":  "passed"
+}

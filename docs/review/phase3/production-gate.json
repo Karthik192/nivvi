@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "rootNotice": true,
+  "protectedPages": [
+    "home",
+    "transactions",
+    "insights",
+    "goals",
+    "transaction"
+  ],
+  "renderedPreviewContent": false,
+  "checkedAt": "2026-11-10T15:01:48.355Z",
+  "limitation": "Static production rendering check; native release execution is not verified."
+}

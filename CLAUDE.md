@@ -4,7 +4,7 @@
 
 Build an original India-first personal finance companion with premium, accessible UI and an encouraging mascot. Default INR, manual capture only; recording UPI as metadata is not payment integration. Never copy Duolingo characters, branding or assets.
 
-Current status: Phase 2 mobile foundation implemented and verified on Android Emulator, awaiting user approval. See docs/PHASE_2_REVIEW.md for results and outstanding original Rive, TalkBack and physical-device gates. Phase 3 requires explicit user approval. This file is intended for Claude Code as the preferred agent and other contributors; it does not imply a particular agent or application is installed.
+Current authorized work: Phase 3 frontend UI, implemented after explicit approval and awaiting phase review. Product screens use clearly labelled development-only mock data. Foundation demonstrations remain under Preview tools. Phase 4 requires explicit approval. See docs/PHASE_3_REVIEW.md for actual validation and outstanding original Rive, TalkBack and physical-device gates. This file is intended for Claude Code and other contributors; it does not imply a particular agent is installed.
 
 Read these proposals before implementation:
 
@@ -45,7 +45,7 @@ Preserve these user review recommendations throughout later phases:
 
 ## Commands and environment
 
-Phase 1's dependency-free browser gallery remains in `design/preview`; see `design/README.md`. Phase 2 adds the npm workspace and Expo application in `apps/mobile`; see the root README and docs/MOBILE_FOUNDATION.md for setup and validation. No backend, ledger, authentication or sync implementation is authorized yet. Windows/PowerShell is the current environment; use native safe path handling and inspect targets before destructive filesystem operations.
+Phase 1's browser gallery remains in `design/preview`. The native Expo app is in `apps/mobile`. Phase 3 may implement forms, calculations and an in-memory development preview; real authentication, backend, durable financial storage and sync remain outside this phase. See the root README for commands. Windows/PowerShell is the current environment; inspect targets before destructive filesystem operations.
 
 ## Phase completion report
 

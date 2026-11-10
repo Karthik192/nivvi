@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { tokens, useTheme } from '../../src/design/theme';
 import { TabIcon } from '../../src/components/brand/TabIcon';
 import { AppText } from '../../src/components/ui/AppText';
+export const unstable_settings = { anchor: 'home' };
 
 export default function TabLayout() {
   const { colours } = useTheme();
@@ -12,6 +13,7 @@ export default function TabLayout() {
   const labelHeight = Math.max(tokens.type.caption.line, ...Object.values(labelHeights));
   return (
     <Tabs
+      backBehavior="initialRoute"
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colours.primary,
@@ -40,24 +42,31 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="home"
         options={{
-          title: 'Studio',
+          title: 'Home',
           tabBarIcon: ({ color }) => <TabIcon name="studio" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="motion"
+        name="transactions"
         options={{
-          title: 'Motion',
-          tabBarIcon: ({ color }) => <TabIcon name="motion" color={color} />,
+          title: 'History',
+          tabBarIcon: ({ color }) => <TabIcon name="history" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="settings"
+        name="insights"
         options={{
-          title: 'Settings',
-          tabBarIcon: ({ color }) => <TabIcon name="settings" color={color} />,
+          title: 'Insights',
+          tabBarIcon: ({ color }) => <TabIcon name="insights" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="goals"
+        options={{
+          title: 'Goals',
+          tabBarIcon: ({ color }) => <TabIcon name="goals" color={color} />,
         }}
       />
     </Tabs>

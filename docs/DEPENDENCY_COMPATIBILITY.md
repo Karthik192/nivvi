@@ -1,5 +1,9 @@
 # Phase 2 dependency compatibility record
 
+Windows Studio build follow-up (10 November 2026): Studio has been upgraded to 2026.2.2, resolving the AGP 9.2.1 IDE mismatch. Its default Gradle cache did not contain the CMake override used by prior command-line builds, exposing Ninja 1.10.2's 260-character path limit again. The new Windows-only `with-windows-cmake.cjs` config plugin selects the already installed SDK CMake 4.1.2/Ninja 1.12.1 in generated project properties. Other hosts keep Expo defaults; no dependency versions changed. Prebuild was run twice and retained one CMake property. Plugin regression tests cover both non-Windows hosts and repeat application while preserving unrelated Gradle properties. All 37 Jest tests, type checking, lint and formatting pass. ARM64 debug assembly passed with Studio's default Gradle cache in 9m24s (537 tasks); see [native build record](review/phase3/native-build-arm64-cmake.json). This fix did not install or run the ARM64 APK on a device.
+
+Phase 3 follow-up (10 November 2026): no dependencies added or versions changed. Expo Doctor 1.21.6 passes 20/20 and `expo install --check` reports versions current for this SDK. The native debug APK rebuilt/installed in 7m22s (537 tasks); focused Android Back checks pass after returning `predictiveBackGestureEnabled` to Expo's default false. Final Android/Hermes and web exports pass. The existing advisory inventory below remains open; see PHASE_3_REVIEW.md for current native evidence and limitations.
+
 Status: selected/installed versions checked; native debug APK built, installed and rendered on Android Emulator. Original Rive animation acceptance remains gated on a real asset.
 
 Checked official Expo SDK reference, Router/manual setup, Reanimated, Gesture Handler, Jest and Rive runtime documentation on 9 November 2026. Queried npm metadata before installing. Node available: 22.14.0, npm 10.9.2.

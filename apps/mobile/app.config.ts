@@ -17,11 +17,18 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     orientation: 'portrait',
     userInterfaceStyle: 'automatic',
     icon: './assets/icon.png',
-    plugins: ['expo-router', 'expo-font', 'expo-dev-client', './plugins/with-font-scale.cjs'],
+    plugins: [
+      'expo-router',
+      'expo-font',
+      'expo-dev-client',
+      './plugins/with-font-scale.cjs',
+      './plugins/with-windows-cmake.cjs',
+    ],
     android: {
       package: development ? 'com.nivvi.app.dev' : 'com.nivvi.app',
       allowBackup: false,
-      predictiveBackGestureEnabled: true,
+      // Keep the supported legacy callback on Android 13–15; verify API 36 separately.
+      predictiveBackGestureEnabled: false,
     },
     ios: {
       bundleIdentifier: development ? 'com.nivvi.app.dev' : 'com.nivvi.app',
@@ -32,7 +39,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     extra: {
       environment: environment.environment,
       ...(environment.apiBaseUrl ? { apiBaseUrl: environment.apiBaseUrl } : {}),
-      phase: 2,
+      phase: 3,
+      previewOnly: true,
       originalRiveAssetReady: false,
     },
   };

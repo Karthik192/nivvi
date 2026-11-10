@@ -1,0 +1,9 @@
+﻿{
+    "date":  "2026-11-10T20:21:27.7639703+05:30",
+    "section":  "captures",
+    "device":  "Pixel_7 API34 x86_64",
+    "status":  "passed",
+    "checks":  [
+                   "Four product screens in both themes; reduced motion and 200% Android text navigation"
+               ]
+}

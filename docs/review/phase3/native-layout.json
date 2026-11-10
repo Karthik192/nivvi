@@ -1,0 +1,8 @@
+﻿{
+    "section":  "layout",
+    "status":  "passed",
+    "checks":  [
+                   "History entries visible above fold; type filters, search and add action work",
+                   "Updated History captures, chart detail and settled 200% text captures"
+               ]
+}

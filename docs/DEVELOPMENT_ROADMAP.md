@@ -1,6 +1,6 @@
 # Development roadmap and approval gates
 
-Status: Phases 0 and 1 approved; Phase 2 foundation implemented and verified on Android Emulator, awaiting approval. Original Rive animation acceptance remains outstanding. See PHASE_2_REVIEW.md. Phase 3 is not authorized.
+Status: Phases 0–2 approved. Phase 3 frontend UI implemented and awaiting review. Original Rive animation acceptance remains outstanding. See PHASE_3_REVIEW.md for verification and open gates. Phase 4 is not authorized.
 No estimated delivery dates until scope, assets and target test hardware are agreed.
 Every phase ends with relevant tests, lint/type checks where applicable, implementation inspection, issue fixes, documentation updates, a concise report and explicit approval. Never proceed automatically. Never claim an emulator/device/build check ran when it did not.
 

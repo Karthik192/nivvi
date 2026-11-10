@@ -1,7 +1,7 @@
 # Personal finance tracker — architecture proposal
 
-Status: Phases 0–1 approved with review recommendations; Phase 2 authorized. Updated: 10 November 2026.
-The mobile foundation is implemented and running on Android Emulator; no backend or ledger is implemented. Phase 2 review precedes any Phase 3 work. Brand foundation: [design system](DESIGN_SYSTEM.md). See [mobile setup](MOBILE_FOUNDATION.md) and [installed compatibility record](DEPENDENCY_COMPATIBILITY.md).
+Status: Phases 0–2 approved; Phase 3 interactive frontend explicitly authorized. Updated: 10 November 2026.
+The native application now has a development-only in-memory product preview. No real authentication, backend, durable ledger or sync is implemented. See [Phase 3 review](PHASE_3_REVIEW.md), [mobile setup](MOBILE_FOUNDATION.md) and [compatibility record](DEPENDENCY_COMPATIBILITY.md).
 
 ## 1. Product boundaries
 

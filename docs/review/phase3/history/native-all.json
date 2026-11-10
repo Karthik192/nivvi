@@ -1,0 +1,10 @@
+﻿{
+    "section":  "all",
+    "error":  "Expected native text: Leave these changes?",
+    "status":  "failed",
+    "checks":  [
+                   "Onboarding navigation, login validation, truthful reset feedback and registration preview",
+                   "Expense create/edit updates Home totals; search finds it; confirmed delete removes it",
+                   "Income entry and refund cap validation through native controls"
+               ]
+}

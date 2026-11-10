@@ -1,6 +1,8 @@
 # Phase 2 — mobile foundation
 
-Status: native foundation implemented and running on Android Emulator; review evidence and remaining asset/accessibility gates are recorded in PHASE_2_REVIEW.md. Phase 3 requires approval.
+Current application note: Phase 3 has moved Studio and Motion to developer tools and made Home, History, Insights and Goals the main tabs. This page records the Phase 2 foundation decisions; [Phase 3 review](PHASE_3_REVIEW.md) describes the current in-memory preview and guards. Original Phase 2 evidence remains historical.
+
+Phase 2 handoff status: native foundation implemented and running on Android Emulator; evidence and remaining asset/accessibility gates are recorded in PHASE_2_REVIEW.md. Phase 3 was subsequently approved and implemented; see the current review linked above.
 
 ## Boundaries
 

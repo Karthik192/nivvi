@@ -1,0 +1,9 @@
+﻿{
+    "section":  "ledger",
+    "error":  "Control not visible: Back",
+    "status":  "failed",
+    "checks":  [
+                   "Expense create/edit updates Home totals; search finds it; confirmed delete removes it",
+                   "Income entry and refund cap validation through native controls"
+               ]
+}

@@ -13,26 +13,52 @@ import { Manrope_700Bold } from '@expo-google-fonts/manrope/700Bold';
 import { ThemeProvider, useTheme } from '../src/design/theme';
 import { useMotion } from '../src/design/useMotion';
 import { MotionProvider } from '../src/design/MotionProvider';
+import { usePreviewStore } from '../src/features/preview/store';
 
 export { ErrorBoundary } from 'expo-router';
+// Preserve a return route when a form/detail is opened by a deep link.
+export const unstable_settings = { anchor: 'index' };
 
 void SplashScreen.preventAutoHideAsync().catch(() => {});
 
 function Navigation() {
   const { colours, mode } = useTheme();
   const { reduced } = useMotion();
+  const profile = usePreviewStore((state) => state.profile);
   return (
     <>
       <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
       <Stack
         screenOptions={{
+          headerShown: false,
+          presentation: 'card',
           headerStyle: { backgroundColor: colours.canvas },
           headerTintColor: colours.ink,
           contentStyle: { backgroundColor: colours.canvas },
           animation: reduced ? 'none' : 'default',
         }}
       >
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="index" />
+        <Stack.Protected guard={__DEV__ && !profile}>
+          <Stack.Screen name="onboarding" />
+          <Stack.Screen name="sign-in" />
+          <Stack.Screen name="register" />
+          <Stack.Screen name="reset-password" />
+        </Stack.Protected>
+        <Stack.Protected guard={__DEV__ && !!profile}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="transaction" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="transaction-detail" />
+          <Stack.Screen name="categories" />
+          <Stack.Screen name="budgets" />
+          <Stack.Screen name="goal" />
+          <Stack.Screen name="goal-detail" />
+          <Stack.Screen name="profile" />
+          <Stack.Screen name="settings" />
+          <Stack.Screen name="preview-tools" />
+          <Stack.Screen name="studio" />
+          <Stack.Screen name="motion" />
+        </Stack.Protected>
         <Stack.Screen
           name="about"
           options={{ presentation: 'modal', title: 'About this foundation' }}

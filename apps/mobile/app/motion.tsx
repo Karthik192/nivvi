@@ -7,12 +7,13 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import { AppText } from '../../src/components/ui/AppText';
-import { Button } from '../../src/components/ui/Button';
-import { Card } from '../../src/components/ui/Card';
-import { Screen } from '../../src/components/ui/Screen';
-import { useTheme, tokens } from '../../src/design/theme';
-import { useMotion } from '../../src/design/useMotion';
+import { router } from 'expo-router';
+import { AppText } from '../src/components/ui/AppText';
+import { Button } from '../src/components/ui/Button';
+import { Card } from '../src/components/ui/Card';
+import { Screen } from '../src/components/ui/Screen';
+import { useTheme, tokens } from '../src/design/theme';
+import { useMotion } from '../src/design/useMotion';
 
 export default function MotionScreen() {
   const { colours } = useTheme();
@@ -38,6 +39,11 @@ export default function MotionScreen() {
   };
   return (
     <Screen>
+      <Button
+        label="Back to preview tools"
+        variant="quiet"
+        onPress={() => router.replace('/preview-tools')}
+      />
       <AppText variant="title" accessibilityRole="header">
         Motion, with purpose.
       </AppText>

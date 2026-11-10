@@ -6,7 +6,7 @@ import { AppText } from './AppText';
 
 type Props = PressableProps & {
   label: string;
-  variant?: 'primary' | 'secondary' | 'destructive';
+  variant?: 'primary' | 'secondary' | 'destructive' | 'quiet';
   busy?: boolean;
 };
 
@@ -32,14 +32,18 @@ export function Button({
       ? colours.primary
       : variant === 'destructive'
         ? colours.dangerSurface
-        : colours.raised;
+        : variant === 'quiet'
+          ? 'transparent'
+          : colours.raised;
   const colour = unavailable
     ? 'onDisabled'
     : variant === 'primary'
       ? 'onPrimary'
       : variant === 'destructive'
         ? 'danger'
-        : 'ink';
+        : variant === 'quiet'
+          ? 'primary'
+          : 'ink';
   return (
     <Animated.View style={motionStyle}>
       <Pressable

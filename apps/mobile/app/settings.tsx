@@ -1,24 +1,22 @@
 import { Switch, View } from 'react-native';
 import Constants from 'expo-constants';
-import { AppText } from '../../src/components/ui/AppText';
-import { Button } from '../../src/components/ui/Button';
-import { Card } from '../../src/components/ui/Card';
-import { Screen } from '../../src/components/ui/Screen';
-import { usePreferences, type ThemePreference } from '../../src/state/preferences';
-import { useTheme } from '../../src/design/theme';
-import { useMotion } from '../../src/design/useMotion';
+import { router } from 'expo-router';
+import { AppText } from '../src/components/ui/AppText';
+import { Button } from '../src/components/ui/Button';
+import { Card } from '../src/components/ui/Card';
+import { Page } from '../src/features/preview/ui';
+import { usePreferences, type ThemePreference } from '../src/state/preferences';
+import { useTheme } from '../src/design/theme';
+import { useMotion } from '../src/design/useMotion';
 
 export default function SettingsScreen() {
   const { theme, setTheme, reduceMotion, setReduceMotion } = usePreferences();
   const { mode, fontsReady, colours } = useTheme();
   const { reduced } = useMotion();
   return (
-    <Screen>
-      <AppText variant="title" accessibilityRole="header">
-        Make room for you.
-      </AppText>
+    <Page title="Make room for you." subtitle="Settings" back>
       <AppText colour="muted">
-        Foundation preferences stay in memory for now. No profile or financial data is stored.
+        Make the space feel yours. These preferences last for this preview session.
       </AppText>
       <Card>
         <AppText variant="heading" accessibilityRole="header">
@@ -72,9 +70,19 @@ export default function SettingsScreen() {
         </AppText>
         <AppText variant="caption">Nim: static original art. Original Rive asset pending.</AppText>
         <AppText variant="caption">
-          API, authentication, SQLite and sync: not implemented in Phase 2.
+          This is a development preview. No banking connection or durable storage is active.
         </AppText>
       </Card>
-    </Screen>
+      <Button
+        label="Preview tools"
+        variant="secondary"
+        onPress={() => router.push('/preview-tools')}
+      />
+      <Button
+        label="About Nivvi and font licence"
+        variant="quiet"
+        onPress={() => router.push('/about')}
+      />
+    </Page>
   );
 }

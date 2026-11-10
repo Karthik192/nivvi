@@ -15,12 +15,12 @@ export default function AboutScreen() {
       </AppText>
       <AppText>
         Nivvi is a personal finance companion in development. This phase establishes the native
-        design system, navigation, themes and animation boundaries.
+        design system, navigation, themes and product screen previews.
       </AppText>
       <Notice
         kind="warning"
         title="A preview, not a ledger."
-        detail="No login, transactions, account balances or financial persistence exist in this foundation."
+        detail="Sample profiles, entries and goals are kept only during the development preview. No real account, financial storage or sync is active."
       />
       <AppText variant="caption" colour="muted">
         Manrope font · SIL Open Font License 1.1.
@@ -32,7 +32,7 @@ export default function AboutScreen() {
         onPress={() => setLicenceVisible((visible) => !visible)}
       />
       {licenceVisible && <AppText variant="caption">{manrope.license}</AppText>}
-      <Button label="Back to Studio" onPress={() => router.dismissTo('/')} />
+      <Button label="Back to Nivvi" onPress={() => router.dismissTo('/')} />
     </Screen>
   );
 }

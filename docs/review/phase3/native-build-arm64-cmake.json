@@ -1,0 +1,22 @@
+﻿{
+    "ninja":  "1.12.1",
+    "apkBytes":  104706546,
+    "cmake":  "4.1.2",
+    "tasks":  537,
+    "duration":  "9m 24s",
+    "tests":  37,
+    "checkedAt":  "2026-11-10T21:37:08.6077122+05:30",
+    "upToDate":  26,
+    "format":  "passed",
+    "windowsLongPathsEnabled":  true,
+    "arm64AppModulePresent":  true,
+    "gradleUserHome":  "C:/Users/KARTHIK/.gradle",
+    "sha256":  "F5E1B3F66C0F0B0FED323826BEF309258125E6CD76813747D492956917DC34AB",
+    "command":  "gradlew.bat app:assembleDebug -PreactNativeArchitectures=arm64-v8a --max-workers=2 --console=plain",
+    "apk":  "apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk",
+    "lint":  "passed",
+    "executed":  511,
+    "installedOnDevice":  false,
+    "status":  "passed",
+    "typecheck":  "passed"
+}

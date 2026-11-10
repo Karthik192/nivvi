@@ -13,7 +13,7 @@ config.resolver.blockList = [
   ...(Array.isArray(existing) ? existing : existing ? [existing] : []),
   new RegExp(`^${localCache}([/\\\\]|$)`),
   // Native compiler outputs contain no JS modules or source assets.
-  /[/\\]android[/\\](?:build|\.cxx|\.gradle)(?:[/\\]|$)/,
+  /[/\\]android[/\\](?:app[/\\])?(?:build|\.cxx|\.gradle)(?:[/\\]|$)/,
 ];
 
 module.exports = config;

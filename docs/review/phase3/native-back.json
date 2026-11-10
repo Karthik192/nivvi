@@ -1,0 +1,7 @@
+﻿{
+    "checks":  [
+                   "Header back, cancel, Android Back and discard",
+                   "Deep-linked unsaved form returns to Home after confirmation"
+               ],
+    "status":  "passed"
+}

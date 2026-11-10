@@ -25,9 +25,11 @@ class MascotBoundary extends Component<
 export function Mascot({
   state = 'idle',
   approvedAsset,
+  size = 144,
 }: {
   state?: NimState;
   approvedAsset?: RiveAsset;
+  size?: number;
 }) {
   const { reduced } = useMotion();
   const focused = useIsFocused();
@@ -38,12 +40,12 @@ export function Mascot({
     );
     return () => subscription.remove();
   }, []);
-  const fallback = <NimStill state={state} />;
+  const fallback = <NimStill state={state} size={size} />;
   if (!approvedAsset || reduced || !active || !focused) return fallback;
   return (
     <MascotBoundary fallback={fallback}>
       <Suspense fallback={fallback}>
-        <RiveSurface asset={approvedAsset} fallback={fallback} />
+        <RiveSurface asset={approvedAsset} fallback={fallback} size={size} />
       </Suspense>
     </MascotBoundary>
   );
