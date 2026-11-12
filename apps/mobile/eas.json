@@ -5,14 +5,14 @@
       "distribution": "internal",
       "env": {
         "APP_VARIANT": "development",
-        "EXPO_PUBLIC_API_BASE_URL": "https://nivvi-app-dev.onrender.com"
+        "EXPO_PUBLIC_API_BASE_URL": "https://nivvi-api-dev.onrender.com"
       },
       "android": { "buildType": "apk" }
     },
     "production": {
       "env": {
         "APP_VARIANT": "production",
-        "EXPO_PUBLIC_API_BASE_URL": "https://nivvi-app-dev.onrender.com"
+        "EXPO_PUBLIC_API_BASE_URL": "https://nivvi-api-dev.onrender.com"
       },
       "android": { "buildType": "app-bundle" }
     }
