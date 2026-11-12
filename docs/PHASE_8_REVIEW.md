@@ -20,7 +20,9 @@ Status: The first polish pass is implemented and automated checks pass. An x86_6
 ## Remaining acceptance work
 
 - Run cold-launch plus animation/frame checks on a real mid-range Android phone. ADB was recovered by restarting the stale 5037 server, but only the emulator is attached; no physical-device measurements are available.
-- Inspect chart/mascot motion, reduced motion, TalkBack announcements and text scaling on a real phone. The emulator rendered both screens, but animation frame timing, TalkBack and increased-font behavior were not measured in this pass.
+- Inspect chart/mascot motion, reduced motion, TalkBack announcements and text scaling on a real phone. The emulator rendered both screens, but animation frame timing, TalkBack and increased-font behavior were not measured in this pass. At the latest follow-up, `emulator-5554` was the only attached device, its font scale was restored to `1.0`, and no TalkBack package was installed.
+- Source inspection confirms the shared `AppText` and `Input` components allow Android font scaling; interactive controls include accessibility roles/labels in the reviewed flows. This is implementation evidence, not a substitute for checking enlarged layouts and spoken announcements with Android accessibility services enabled.
+- A previous debug cold-launch command timed out before the app later rendered onboarding. Treat that as an inconclusive emulator/dev-launcher diagnostic, not a launch-time measurement. A development-build memory snapshot is likewise not a production performance benchmark.
 - Rive remains a static original Nim fallback until approved original assets are available and native rendering/bindings are verified.
 
 No performance, accessibility certification or production-readiness claim is made. Keep Phase 8 open for the device review; do not advance to Phase 9 yet.
