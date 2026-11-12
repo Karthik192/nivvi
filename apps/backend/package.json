@@ -4,16 +4,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "npm run build --workspace @nivvi/contracts && tsx watch --env-file=.env.local src/server.ts",
+    "dev": "npm run build --workspace @nivvi/contracts && tsx watch --env-file=.env.local --env-file=../../.env.local src/server.ts",
     "build": "npm run build --workspace @nivvi/contracts && tsc -p tsconfig.build.json",
-    "start": "node --env-file=.env.local dist/server.js",
+    "start": "node --env-file=.env.local --env-file=../../.env.local dist/server.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src tests prisma.config.ts",
     "test": "npm run build --workspace @nivvi/contracts && tsx --env-file=.env.test.local --test --test-concurrency=1 tests/*.test.ts",
     "db:generate": "prisma generate",
-    "db:migrate": "node --env-file=.env.local ../../node_modules/prisma/build/index.js migrate deploy",
+    "db:migrate": "node --env-file=.env.local --env-file=../../.env.local ../../node_modules/prisma/build/index.js migrate deploy",
     "db:migrate:test": "node --env-file=.env.test.local ../../node_modules/prisma/build/index.js migrate deploy",
-    "mail:work": "tsx --env-file=.env.local src/mail-worker.ts"
+    "mail:work": "tsx --env-file=.env.local --env-file=../../.env.local src/mail-worker.ts"
   },
   "dependencies": {
     "@nivvi/contracts": "*",

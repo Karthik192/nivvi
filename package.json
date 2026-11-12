@@ -16,6 +16,7 @@
   "scripts": {
     "mobile": "npm run start --workspace @nivvi/mobile",
     "android": "npm run android --workspace @nivvi/mobile",
+    "build": "npm run build --workspace @nivvi/backend",
     "typecheck": "npm run build --workspace @nivvi/contracts && npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
@@ -24,6 +25,7 @@
     "production:verify": "node scripts/verify-production-build.mjs"
   },
   "devDependencies": {
+    "@neon/config": "1.14.0",
     "prettier": "3.9.10"
   }
 }

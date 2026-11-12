@@ -16,3 +16,4 @@ apps/mobile/expo-env.d.ts
 .idea/
 tmp/pdfs/
 apps/backend/src/generated/
+.neon
