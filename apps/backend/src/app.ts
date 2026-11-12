@@ -11,19 +11,32 @@ import { analyticsRouter } from './analytics/index.js';
 import { makeOpenApi } from './openapi.js';
 
 function databaseErrorDetails(error: unknown) {
-  const details: Array<{ name: string; code?: string | number }> = [];
+  const details: Array<{ name: string; code?: string | number; originalCode?: string | number }> =
+    [];
   const seen = new Set<object>();
-  let current: unknown = error;
-  while (current && typeof current === 'object' && details.length < 4 && !seen.has(current)) {
+  const pending: unknown[] = [error];
+  while (pending.length && details.length < 8) {
+    const current = pending.shift();
+    if (!current || typeof current !== 'object' || seen.has(current)) continue;
     seen.add(current);
-    const value = current as { name?: unknown; code?: unknown; cause?: unknown };
+    const value = current as {
+      name?: unknown;
+      code?: unknown;
+      originalCode?: unknown;
+      cause?: unknown;
+      meta?: unknown;
+      driverAdapterError?: unknown;
+    };
     details.push({
       name: typeof value.name === 'string' ? value.name : 'Error',
       ...(typeof value.code === 'string' || typeof value.code === 'number'
         ? { code: value.code }
         : {}),
+      ...(typeof value.originalCode === 'string' || typeof value.originalCode === 'number'
+        ? { originalCode: value.originalCode }
+        : {}),
     });
-    current = value.cause;
+    pending.push(value.meta, value.driverAdapterError, value.cause);
   }
   return details;
 }
