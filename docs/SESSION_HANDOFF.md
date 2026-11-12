@@ -1,6 +1,8 @@
-# Current handoff — Phase 7
+# Current handoff — Phase 8
 
-The latest continuation started Phase 7. Initial Android Glance widget implementation is ready for review; read [PHASE_7_REVIEW.md](PHASE_7_REVIEW.md). AndroidX Glance Kotlin compile and full x86_64 debug APK build passed on 12 November 2026. Mobile TypeScript, ESLint and 53 Jest tests passed. The emulator widget could not be exercised in this session because the local ADB command did not return. The widget's amount/category buttons open the existing transaction form; there is no native direct-save inbox. Stop here for explicit Phase 7 approval before Phase 8. Do not commit, push or deploy without a separate instruction.
+The user asked to push and continue. Phase 4–7 work was pushed to `main` as `4ff15e3`. Phase 8 polish changes are implemented locally; review [PHASE_8_REVIEW.md](PHASE_8_REVIEW.md). TypeScript, ESLint, all 53 mobile Jest tests and the x86_64 debug APK build passed. ADB was recovered by restarting the stale default server; the Android 14 x86_64 emulator now displays the preview Home/Insights screens. Real mid-range phone performance, animation frame timing and TalkBack review remain outstanding. Metro is running on port 8081 in preview mode for this emulator session. Do not advance to Phase 9 until Phase 8 device checks are completed and approved. No Phase 8 commit/push has been made yet.
+
+Phase 7 widget review is at [PHASE_7_REVIEW.md](PHASE_7_REVIEW.md). Widget placement and interaction remain unverified. Amount/category shortcuts open the existing transaction form; there is no native direct-save inbox.
 
 The earlier Phase 6 handoff below is historical; consult [PHASE_6_REVIEW.md](PHASE_6_REVIEW.md) for its evidence and limitations.
 

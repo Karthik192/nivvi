@@ -1,7 +1,9 @@
 import { Component, lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
 import { AppState } from 'react-native';
 import { useIsFocused } from 'expo-router';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { useMotion } from '../../design/useMotion';
+import { tokens } from '../../design/theme';
 import { NimStill, type NimState } from './NimStill';
 import type { RiveAsset } from './RiveSurface';
 
@@ -40,12 +42,19 @@ export function Mascot({
     );
     return () => subscription.remove();
   }, []);
-  const fallback = <NimStill state={state} size={size} />;
-  if (!approvedAsset || reduced || !active || !focused) return fallback;
+  const still = (
+    <Animated.View
+      key={state}
+      entering={reduced ? undefined : FadeIn.duration(tokens.motion.feedback)}
+    >
+      <NimStill state={state} size={size} />
+    </Animated.View>
+  );
+  if (!approvedAsset || reduced || !active || !focused) return still;
   return (
-    <MascotBoundary fallback={fallback}>
-      <Suspense fallback={fallback}>
-        <RiveSurface asset={approvedAsset} fallback={fallback} size={size} />
+    <MascotBoundary fallback={still}>
+      <Suspense fallback={still}>
+        <RiveSurface asset={approvedAsset} fallback={still} size={size} />
       </Suspense>
     </MascotBoundary>
   );

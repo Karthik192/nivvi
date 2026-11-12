@@ -351,7 +351,7 @@ export function TransactionForm() {
       <AppText variant="caption" colour="muted">
         {isPreview
           ? 'This updates the session preview only. Nothing is stored on your device or synced.'
-          : 'Your entry is saved to your account when you confirm. An internet connection is required.'}
+          : 'Your entry is saved on this device first, then synced when a connection is available.'}
       </AppText>
       {saving && <Mascot state="saving" />}
       {unsaved.dialog}

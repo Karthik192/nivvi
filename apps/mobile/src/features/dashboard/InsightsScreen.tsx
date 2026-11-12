@@ -3,13 +3,11 @@ import { OnlineInsights } from '../../data/OnlineScreens';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import Animated, { FadeIn } from 'react-native-reanimated';
-import Svg, { Rect } from 'react-native-svg';
 import { AppText } from '../../components/ui/AppText';
+import { AnimatedBarChart } from '../../components/ui/AnimatedBarChart';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { useTheme } from '../../design/theme';
-import { useMotion } from '../../design/useMotion';
 import { Page, Row, MonthPicker, Meter, Section, Resource, EmptyState } from '../preview/ui';
 import { currentMonth, money, totals, shiftMonth, monthName, today } from '../preview/finance';
 import { spendingPeriods, categoryBreakdown, merchantBreakdown } from '../preview/analytics';
@@ -22,7 +20,6 @@ function PreviewInsightsScreen() {
   const transactions = useAppStore((state) => state.transactions);
   const categories = useAppStore((state) => state.categories);
   const { colours } = useTheme();
-  const { reduced } = useMotion();
   const [month, setMonth] = useState(currentMonth);
   const [view, setView] = useState<'weekly' | 'monthly'>('weekly');
   const summary = totals(transactions, month);
@@ -81,26 +78,14 @@ function PreviewInsightsScreen() {
             />
           </Row>
           <Card>
-            <Animated.View
-              key={`${month}-${view}`}
-              entering={reduced ? undefined : FadeIn.duration(260)}
-              accessible={false}
-              importantForAccessibility="no-hide-descendants"
-            >
-              <Svg width="100%" height={150} viewBox="0 0 280 150" accessible={false}>
-                {periods.map((period, index) => (
-                  <Rect
-                    key={period.label}
-                    x={index * (280 / periods.length) + 8}
-                    y={140 - Math.max(0, period.value / max) * 125}
-                    width={Math.max(8, 280 / periods.length - 16)}
-                    height={period.value > 0 ? Math.max(2, (period.value / max) * 125) : 0}
-                    rx={6}
-                    fill={index === periods.length - 1 ? colours.onAccent : colours.primary}
-                  />
-                ))}
-              </Svg>
-            </Animated.View>
+            <AnimatedBarChart
+              points={periods.map((period, index) => ({
+                label: period.label,
+                value: Math.max(0, period.value),
+                colour: index === periods.length - 1 ? colours.onAccent : colours.primary,
+              }))}
+              max={max}
+            />
             <AppText variant="caption" colour="muted">
               {view === 'weekly'
                 ? `Monday-start weeks · ${month === currentMonth() ? `entries through ${today()}` : 'selected month'}`

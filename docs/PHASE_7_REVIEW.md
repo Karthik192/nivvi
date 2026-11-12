@@ -28,4 +28,4 @@ Status: Initial implementation is ready for review. The Android debug APK and na
 - Phase 6 review found no locally cached categories in the test profile, so category shortcut behavior with real offline data has not been demonstrated.
 - No real-device Android widget acceptance or mid-range performance measurements are claimed.
 
-Approval gate: review this implementation and its limitations. Stop before Phase 8 until explicit approval.
+The user continued to Phase 8. Widget-specific launcher placement, deep-link actions and real-device behavior remain unverified and should be completed before the widget is treated as accepted.
