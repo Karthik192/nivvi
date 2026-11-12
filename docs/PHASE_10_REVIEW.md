@@ -18,6 +18,8 @@ The native `apps/mobile/android/` directory is Git-ignored, so a clean EAS build
 | Mobile ESLint | Passed. |
 | Prettier on changed TypeScript/EAS configuration | Passed. |
 | Design invariants | Passed: 52 contrast pairs, theme parity, spacing/type/motion invariants and four local SVG assets. |
+| `npm run production:verify` | Passed for six static web routes: no preview-only strings in the exported HTML. The script report explicitly limits this to a static check; it does not validate Android, the production API or runtime behavior. |
+| `npm run build --workspace @nivvi/backend` | Passed: contracts compiled and the backend TypeScript production build completed. |
 | `:app:assembleDebug -PreactNativeArchitectures=arm64-v8a` | Passed after restoring the Git-ignored native directory to its original development configuration. APK created at `apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk` (109.3 MB). APK metadata reports `com.nivvi.app.dev`, version `0.1.0`, min SDK 24 and target SDK 36. This is a debug development build; it was not installed on a device. |
 | Production Expo config | Passed with a temporary example HTTPS URL: resolved to app name `Nivvi`, package `com.nivvi.app`, scheme `nivvi`, and the supplied API base URL. The example URL was not saved to project configuration. |
 | Production AAB build/install | Not run; signing, production API URL and EAS build credentials are not configured. |

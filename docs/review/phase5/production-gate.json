@@ -9,6 +9,6 @@
     "transaction"
   ],
   "previewContentRendered": false,
-  "checkedAt": "2026-11-12T03:12:45.991Z",
+  "checkedAt": "2026-11-12T14:04:43.029Z",
   "limitation": "Static HTML check only. Routes render the secure-session bootstrap until client startup; this does not verify an Android release build or production API."
 }
