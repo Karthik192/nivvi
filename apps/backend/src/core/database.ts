@@ -5,16 +5,19 @@ import { uuid } from '@nivvi/contracts';
 import { PrismaClient, Prisma } from '../generated/prisma/client.js';
 import { ApiError } from './errors.js';
 import type { Deps, Tx } from './types.js';
-export const createDatabase = (url: string) =>
-  new PrismaClient({
+export const createDatabase = (url: string) => {
+  const pooled = new URL(url).hostname.includes('-pooler.');
+  return new PrismaClient({
     adapter: new PrismaPg({
       connectionString: url,
       max: 10,
       connectionTimeoutMillis: 5000,
       idleTimeoutMillis: 10000,
-      options: '-c statement_timeout=10000 -c lock_timeout=5000',
+      // Neon PgBouncer rejects custom startup options such as statement_timeout.
+      ...(!pooled && { options: '-c statement_timeout=10000 -c lock_timeout=5000' }),
     }),
   });
+};
 export function serialize(value: unknown): Prisma.JsonValue {
   return JSON.parse(
     JSON.stringify(value, (_key, v) => (typeof v === 'bigint' ? v.toString() : v)),
