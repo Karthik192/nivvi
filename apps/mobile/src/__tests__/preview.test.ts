@@ -2,6 +2,7 @@ import { usePreviewStore } from '../features/preview/store';
 import {
   amountInput,
   currentMonth,
+  exactTotals,
   goalSaved,
   parseAmount,
   progressPercent,
@@ -42,10 +43,13 @@ describe('integer-paise validation and reporting boundaries', () => {
     expect(parseAmount('999999999.99')).toBe(99999999999);
     expect(amountInput(1001)).toBe('10.01');
   });
-  it.each(['0', '-1', '1.234', '1e3', 'NaN', 'Infinity', '1,000', '1000000000', '.5', ''])(
+  it.each(['0', '-1', '1.234', '1e3', 'NaN', 'Infinity', '1,000', '10000000000', '.5', ''])(
     'rejects malformed or out-of-range money: %s',
     (value) => expect(() => parseAmount(value)).toThrow(),
   );
+  it('accepts the shared API maximum without rounding', () => {
+    expect(parseAmount('9999999999.99')).toBe(999999999999);
+  });
   it('rejects overflowed dates and follows calendar month boundaries', () => {
     expect(validDate('2026-02-30')).toBe(false);
     expect(validDate('2028-02-29')).toBe(true);
@@ -66,6 +70,12 @@ describe('integer-paise validation and reporting boundaries', () => {
     expect(totals(records, earlier).expenses).toBe(240000);
     expect(progressPercent(-40000, 100000)).toBe(0);
     expect(progressPercent(200000, 100000)).toBe(100);
+  });
+  it('keeps offline aggregate money exact beyond the safe integer range', () => {
+    const row=createFixtures().transactions.find((record)=>record.type==='expense')!;
+    const records=Array.from({length:10000},(_,index)=>({...row,id:`large-${index}`,date:`${currentMonth()}-01`,amountPaise:999999999999}));
+    expect(exactTotals(records,currentMonth()).gross).toBe('9999999999990000');
+    expect(exactTotals(records,currentMonth()).expenses).toBe('9999999999990000');
   });
 });
 describe('preview mutations and derived views', () => {
@@ -152,7 +162,7 @@ describe('preview mutations and derived views', () => {
     ).toThrow();
     expect(() =>
       validateBudget({ month: currentMonth(), limitPaise: 0, categoryLimits: {} }),
-    ).toThrow();
+    ).not.toThrow();
   });
   it('restores an archived category instead of recreating its name under a new ID', () => {
     const state = usePreviewStore.getState();

@@ -1,3 +1,6 @@
+import { useQuery } from '@tanstack/react-query';
+import { api, isPreview } from '../../data/runtime';
+import type { DashboardDTO } from '../../data/reports';
 import { useRef, useState, type ComponentRef } from 'react';
 import { AccessibilityInfo, View, type TextInput } from 'react-native';
 import { AppText } from '../../components/ui/AppText';
@@ -13,7 +16,7 @@ import {
   monthName,
   totals,
 } from '../preview/finance';
-import { usePreviewStore } from '../preview/store';
+import { useAppStore } from '../../data/store';
 import {
   Chip,
   Confirmation,
@@ -50,7 +53,7 @@ export function BudgetsScreen() {
         detail="Your unsaved edits for this month will be discarded."
         confirmLabel="Discard edits"
         onCancel={() => setPending('')}
-        onConfirm={() => {
+        onConfirm={async () => {
           setDirty(false);
           setMonth(pending);
           setPending('');
@@ -70,8 +73,9 @@ function MonthBudget({
   onDirty: (dirty: boolean) => void;
   onMonth: (month: string) => void;
 }) {
-  const { budgets, categories, transactions, saveBudget } = usePreviewStore();
+  const { budgets, categories, transactions, saveBudget } = useAppStore();
   const budget = budgets[month];
+  const [baseline, setBaseline] = useState(budget);
   const [monthly, setMonthly] = useState(() => (budget ? amountInput(budget.limitPaise) : ''));
   const [limits, setLimits] = useState<Record<string, string>>(() =>
     Object.fromEntries(
@@ -84,7 +88,28 @@ function MonthBudget({
   const submitting = useRef(false);
   const monthlyRef = useRef<ComponentRef<typeof TextInput>>(null);
   const categoryRefs = useRef<Record<string, ComponentRef<typeof TextInput> | null>>({});
-  const spent = totals(transactions, month).expenses;
+  const report = useQuery({
+    queryKey: ['account', useAppStore.getState().profile?.id, 'budget-report', month],
+    enabled: !isPreview,
+    queryFn: async () => {
+      const dashboard = await api.request<DashboardDTO>(`/dashboard?month=${month}`);
+      const categories = await api.request<{
+        categories: { categoryId: string; netExpense: string }[];
+      }>(
+        `/analytics/categories?${new URLSearchParams({ from: dashboard.from, to: dashboard.to })}`,
+      );
+      return { dashboard, categories };
+    },
+  });
+  const spent = isPreview
+    ? totals(transactions, month).expenses
+    : Number(report.data?.dashboard.totals.netExpense ?? 0);
+  const categorySpent = (id: string) =>
+    isPreview
+      ? categorySpending(transactions, month, id)
+      : Number(
+          report.data?.categories.categories.find((r) => r.categoryId === id)?.netExpense ?? 0,
+        );
   const edit = (field: string) => {
     submitting.current = false;
     onDirty(true);
@@ -98,7 +123,7 @@ function MonthBudget({
   const history = Object.values(budgets)
     .filter((item) => item.month < month)
     .sort((a, b) => b.month.localeCompare(a.month));
-  const save = () => {
+  const save = async () => {
     if (submitting.current) return;
     submitting.current = true;
     const result = budgetDraft(month, monthly, limits);
@@ -127,7 +152,13 @@ function MonthBudget({
       return;
     }
     try {
-      saveBudget(result.budget);
+      await saveBudget({
+        ...result.budget,
+        id: baseline?.id,
+        version: baseline?.version,
+        allocations: baseline?.allocations ?? [],
+      });
+      setBaseline(useAppStore.getState().budgets[month]);
       onDirty(false);
       setSaved(true);
     } catch (caught) {
@@ -137,6 +168,13 @@ function MonthBudget({
       submitting.current = false;
     }
   };
+  if (!isPreview && (report.isPending || report.isError))
+    return (
+      <View>
+        <AppText>{report.error?.message ?? 'Loading your budget?'}</AppText>
+        <Button label="Try again" onPress={() => void report.refetch()} />
+      </View>
+    );
   return (
     <View style={{ gap: 24 }}>
       {budget ? (
@@ -171,9 +209,9 @@ function MonthBudget({
             <Meter
               key={id}
               label={categories.find((item) => item.id === id)?.name ?? 'Unavailable category'}
-              value={categorySpending(transactions, month, id)}
+              value={categorySpent(id)}
               limit={limit}
-              detail={`${money(categorySpending(transactions, month, id))} of ${money(limit)}`}
+              detail={`${money(categorySpent(id))} of ${money(limit)}`}
             />
           ))}
         </Card>
@@ -249,7 +287,7 @@ function MonthBudget({
         <ErrorText message={error || Object.values(errors).filter(Boolean).join(' ')} />
         {saved && (
           <AppText colour="positive" accessibilityLiveRegion="polite">
-            Budget updated for {monthName(month)} in this session.
+            Budget updated for {monthName(month)}.
           </AppText>
         )}
         <Button label="Save budget" onPress={save} />

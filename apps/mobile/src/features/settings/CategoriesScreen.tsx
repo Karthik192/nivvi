@@ -13,7 +13,7 @@ import {
   type CategoryIcon as IconKey,
   type CategoryKind,
 } from '../preview/model';
-import { usePreviewStore } from '../preview/store';
+import { useAppStore } from '../../data/store';
 import {
   Chip,
   Confirmation,
@@ -25,10 +25,11 @@ import {
   Section,
 } from '../preview/ui';
 import { useUnsaved } from '../preview/useUnsaved';
+import { isPreview } from '../../data/runtime';
 
 export function CategoriesScreen() {
   const params = useLocalSearchParams<{ id?: string | string[]; create?: string | string[] }>();
-  const categories = usePreviewStore((state) => state.categories);
+  const categories = useAppStore((state) => state.categories);
   const editing = params.id !== undefined;
   const creating = params.create === 'true' && !editing;
   const category = categories.find((item) => item.id === params.id && !item.archived);
@@ -42,7 +43,7 @@ export function CategoriesScreen() {
             ? 'Make it your own.'
             : 'A place for every little thing.'
       }
-      subtitle="Preview categories"
+      subtitle="Your categories"
       back
     >
       <Resource>
@@ -64,16 +65,16 @@ export function CategoriesScreen() {
 }
 
 function CategoryList() {
-  const categories = usePreviewStore((state) => state.categories);
-  const archiveCategory = usePreviewStore((state) => state.archiveCategory);
-  const saveCategory = usePreviewStore((state) => state.saveCategory);
+  const categories = useAppStore((state) => state.categories);
+  const archiveCategory = useAppStore((state) => state.archiveCategory);
+  const saveCategory = useAppStore((state) => state.saveCategory);
   const [archive, setArchive] = useState<Category | null>(null);
   const [error, setError] = useState('');
-  const restore = (category: Category) => {
+  const restore = async (category: Category) => {
     try {
-      saveCategory(category.name, category.kind, category.icon, category.id);
+      await saveCategory(category.name, category.kind, category.icon, category.id);
       setError('');
-      AccessibilityInfo.announceForAccessibility(`${category.name} restored in this preview.`);
+      AccessibilityInfo.announceForAccessibility(`${category.name} restored.`);
     } catch (caught) {
       const message =
         caught instanceof Error ? caught.message : 'This category could not be restored.';
@@ -169,10 +170,15 @@ function CategoryList() {
         detail="This hides the category from new entries. Existing entries and their category stay intact. You can restore it from the archived list."
         confirmLabel="Archive category"
         onCancel={() => setArchive(null)}
-        onConfirm={() => {
-          if (archive) archiveCategory(archive.id);
-          setArchive(null);
-          setError('');
+        onConfirm={async () => {
+          try {
+            if (archive) await archiveCategory(archive.id);
+            setArchive(null);
+            setError('');
+          } catch (error) {
+            setError((error as Error).message);
+            setArchive(null);
+          }
         }}
       />
     </>
@@ -180,8 +186,9 @@ function CategoryList() {
 }
 
 function CategoryForm({ category }: { category?: Category }) {
+  const version = useRef(category?.version);
   const { colours } = useTheme();
-  const saveCategory = usePreviewStore((state) => state.saveCategory);
+  const saveCategory = useAppStore((state) => state.saveCategory);
   const [name, setName] = useState(category?.name ?? '');
   const [kind, setKind] = useState<CategoryKind>(category?.kind ?? 'expense');
   const [icon, setIcon] = useState<IconKey>(category?.icon ?? 'other');
@@ -192,9 +199,9 @@ function CategoryForm({ category }: { category?: Category }) {
     kind !== (category?.kind ?? 'expense') ||
     icon !== (category?.icon ?? 'other');
   const unsaved = useUnsaved(dirty);
-  const save = () => {
+  const save = async () => {
     try {
-      saveCategory(name, kind, icon, category?.id);
+      await saveCategory(name, kind, icon, category?.id, version.current);
       unsaved.allowNavigation();
       router.replace('/categories');
     } catch (caught) {
@@ -273,7 +280,9 @@ function CategoryForm({ category }: { category?: Category }) {
         ))}
       </Row>
       <AppText variant="caption" colour="muted">
-        Changes live only in this preview session. No storage or backend is connected.
+        {isPreview
+          ? 'Changes live only in this preview session. No storage or backend is connected.'
+          : 'Changes are saved to your account.'}
       </AppText>
       <Button label={category ? 'Save category changes' : 'Add category'} onPress={save} />
       {unsaved.dialog}

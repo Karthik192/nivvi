@@ -1,4 +1,5 @@
 import 'react-native-reanimated';
+import '../src/data/offline/background';
 import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -13,7 +14,11 @@ import { Manrope_700Bold } from '@expo-google-fonts/manrope/700Bold';
 import { ThemeProvider, useTheme } from '../src/design/theme';
 import { useMotion } from '../src/design/useMotion';
 import { MotionProvider } from '../src/design/MotionProvider';
-import { usePreviewStore } from '../src/features/preview/store';
+import { DataProvider } from '../src/data/Provider';
+import { isPreview, session } from '../src/data/runtime';
+import { Screen } from '../src/components/ui/Screen';
+import { AppText } from '../src/components/ui/AppText';
+import { useAppStore } from '../src/data/store';
 
 export { ErrorBoundary } from 'expo-router';
 // Preserve a return route when a form/detail is opened by a deep link.
@@ -24,7 +29,14 @@ void SplashScreen.preventAutoHideAsync().catch(() => {});
 function Navigation() {
   const { colours, mode } = useTheme();
   const { reduced } = useMotion();
-  const profile = usePreviewStore((state) => state.profile);
+  const profile = useAppStore((state) => state.profile);
+  const ready = session((s) => s.ready);
+  if (!ready)
+    return (
+      <Screen>
+        <AppText>Opening your space...</AppText>
+      </Screen>
+    );
   return (
     <>
       <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
@@ -39,13 +51,14 @@ function Navigation() {
         }}
       >
         <Stack.Screen name="index" />
-        <Stack.Protected guard={__DEV__ && !profile}>
+        <Stack.Screen name="account-action" />
+        <Stack.Protected guard={!profile || !isPreview}>
           <Stack.Screen name="onboarding" />
           <Stack.Screen name="sign-in" />
           <Stack.Screen name="register" />
           <Stack.Screen name="reset-password" />
         </Stack.Protected>
-        <Stack.Protected guard={__DEV__ && !!profile}>
+        <Stack.Protected guard={!!profile}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="transaction" options={{ presentation: 'modal' }} />
           <Stack.Screen name="transaction-detail" />
@@ -55,9 +68,11 @@ function Navigation() {
           <Stack.Screen name="goal-detail" />
           <Stack.Screen name="profile" />
           <Stack.Screen name="settings" />
-          <Stack.Screen name="preview-tools" />
-          <Stack.Screen name="studio" />
-          <Stack.Screen name="motion" />
+          <Stack.Protected guard={isPreview}>
+            <Stack.Screen name="preview-tools" />
+            <Stack.Screen name="studio" />
+            <Stack.Screen name="motion" />
+          </Stack.Protected>
         </Stack.Protected>
         <Stack.Screen
           name="about"
@@ -85,7 +100,9 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <ThemeProvider fontsReady={fontsReady}>
           <MotionProvider>
-            <Navigation />
+            <DataProvider>
+              <Navigation />
+            </DataProvider>
           </MotionProvider>
         </ThemeProvider>
       </SafeAreaProvider>

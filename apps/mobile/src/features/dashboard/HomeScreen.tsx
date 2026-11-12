@@ -1,3 +1,5 @@
+import { isPreview } from '../../data/runtime';
+import { OnlineHome } from '../../data/OnlineScreens';
 import { router } from 'expo-router';
 import { View } from 'react-native';
 import { AppText } from '../../components/ui/AppText';
@@ -7,16 +9,19 @@ import { Mascot } from '../../components/brand/Mascot';
 import { useTheme } from '../../design/theme';
 import { Page, Row, Meter, Section, EmptyState, Resource } from '../preview/ui';
 import { currentMonth, monthName, money, totals, goalSaved } from '../preview/finance';
-import { usePreviewStore } from '../preview/store';
+import { useAppStore } from '../../data/store';
 import { TransactionRow } from '../transactions/TransactionRow';
 
 export function HomeScreen() {
+  return isPreview ? <PreviewHomeScreen /> : <OnlineHome />;
+}
+function PreviewHomeScreen() {
   const { colours } = useTheme();
-  const transactions = usePreviewStore((state) => state.transactions);
-  const categories = usePreviewStore((state) => state.categories);
-  const profile = usePreviewStore((state) => state.profile);
-  const budgets = usePreviewStore((state) => state.budgets);
-  const goals = usePreviewStore((state) => state.goals);
+  const transactions = useAppStore((state) => state.transactions);
+  const categories = useAppStore((state) => state.categories);
+  const profile = useAppStore((state) => state.profile);
+  const budgets = useAppStore((state) => state.budgets);
+  const goals = useAppStore((state) => state.goals);
   const month = currentMonth();
   const summary = totals(transactions, month);
   const budget = budgets[month];

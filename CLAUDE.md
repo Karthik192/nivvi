@@ -4,7 +4,7 @@
 
 Build an original India-first personal finance companion with premium, accessible UI and an encouraging mascot. Default INR, manual capture only; recording UPI as metadata is not payment integration. Never copy Duolingo characters, branding or assets.
 
-Current authorized work: Phase 3 frontend UI, implemented after explicit approval and awaiting phase review. Product screens use clearly labelled development-only mock data. Foundation demonstrations remain under Preview tools. Phase 4 requires explicit approval. See docs/PHASE_3_REVIEW.md for actual validation and outstanding original Rive, TalkBack and physical-device gates. This file is intended for Claude Code and other contributors; it does not imply a particular agent is installed.
+Current state: Phases 0–6 are implemented and reviewed; Phase 7's initial Android Glance widget is implemented and awaiting user review. See docs/PHASE_6_REVIEW.md and docs/PHASE_7_REVIEW.md for evidence and limitations. Emulator/physical widget interaction remains unverified. Live API mode is the default; mock preview is selectable only in development. Original Rive assets, TalkBack review and physical performance measurements remain outstanding. This file is intended for Claude Code and other contributors; it does not imply a particular agent is installed.
 
 Read these proposals before implementation:
 
@@ -45,7 +45,7 @@ Preserve these user review recommendations throughout later phases:
 
 ## Commands and environment
 
-Phase 1's browser gallery remains in `design/preview`. The native Expo app is in `apps/mobile`. Phase 3 may implement forms, calculations and an in-memory development preview; real authentication, backend, durable financial storage and sync remain outside this phase. See the root README for commands. Windows/PowerShell is the current environment; inspect targets before destructive filesystem operations.
+Phase 1's browser gallery remains in `design/preview`. The native Expo app is in `apps/mobile`; the backend is in `apps/backend` and API contracts in `packages/contracts`. PostgreSQL runs locally with separate migration/runtime roles and development/test databases; tests must use `nivvi_test`. Generate Prisma before checks on a clean checkout. Mobile transport, session storage, SQLite/outbox and widget bridge live in `apps/mobile/src/data` and `apps/mobile/modules`. Use adb reverse for Metro 8081 and API 3000 on a USB/emulator development connection. Windows/PowerShell is the current environment; inspect targets before destructive filesystem operations.
 
 ## Phase completion report
 

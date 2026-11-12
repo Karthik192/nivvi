@@ -28,6 +28,7 @@ export const iconKeys = [
 ] as const;
 export type CategoryIcon = (typeof iconKeys)[number];
 export type Category = {
+  version?: number;
   id: string;
   name: string;
   kind: CategoryKind;
@@ -36,7 +37,9 @@ export type Category = {
 };
 export type Transaction = {
   id: string;
-  userId: 'preview';
+  userId: string;
+  version?: number;
+  occurredAt?: string;
   amountPaise: number;
   type: TransactionType;
   categoryId: string;
@@ -47,8 +50,11 @@ export type Transaction = {
   createdAt: string;
   updatedAt: string;
   originalExpenseId?: string;
+  syncStatus?: 'pending' | 'synced' | 'conflict';
+  remoteConflict?: Record<string, unknown>;
 };
 export type TransactionDraft = {
+  clientId?: string;
   amount: string;
   type: TransactionType;
   categoryId: string;
@@ -58,14 +64,23 @@ export type TransactionDraft = {
   date: string;
   originalExpenseId?: string;
 };
-export type Contribution = { id: string; amountPaise: number; date: string };
+export type Contribution = { id: string; amountPaise: number; date: string; version?: number };
 export type Goal = {
+  version?: number;
+  savedPaise?: number;
   id: string;
   name: string;
   targetPaise: number;
   targetDate: string;
   contributions: Contribution[];
 };
-export type Budget = { month: string; limitPaise: number; categoryLimits: Record<string, number> };
-export type Profile = { name: string; email: string };
+export type Budget = {
+  id?: string;
+  version?: number;
+  allocations?: { id: string; categoryId: string; version: number; limitMinor: string }[];
+  month: string;
+  limitPaise: number;
+  categoryLimits: Record<string, number>;
+};
+export type Profile = { id?: string; version?: number; name: string; email: string };
 export type PreviewScenario = 'ready' | 'loading' | 'error';

@@ -1,14 +1,17 @@
 import { useCallback, useRef, useState, type ComponentRef } from 'react';
 import { router, useFocusEffect } from 'expo-router';
-import { AccessibilityInfo, Keyboard, StyleSheet, View, type TextInput } from 'react-native';
+import { Keyboard, StyleSheet, View, type TextInput } from 'react-native';
 import { Mascot } from '../../components/brand/Mascot';
 import { AppText } from '../../components/ui/AppText';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { Screen } from '../../components/ui/Screen';
+import { authenticate } from '../../data/store';
+import { api, isPreview, session } from '../../data/runtime';
+import { registerBody, loginBody, forgotBody } from '@nivvi/contracts';
 import { tokens, useTheme } from '../../design/theme';
-import { usePreviewStore } from '../preview/store';
+import { useAppStore } from '../../data/store';
 
 type Mode = 'sign-in' | 'register' | 'reset-password';
 type Field = 'name' | 'email' | 'password' | 'confirm';
@@ -17,21 +20,21 @@ type Errors = Partial<Record<Field, string>>;
 const copy = {
   'sign-in': {
     title: 'A little clarity starts here.',
-    action: 'Enter preview',
+    action: 'Sign in',
   },
   register: {
     title: 'Make room for a little progress.',
-    action: 'Create preview profile',
+    action: 'Create account',
   },
   'reset-password': {
     title: 'A fresh start, gently.',
-    action: 'Preview password reset',
+    action: 'Request reset instructions',
   },
 };
 
 export function AuthScreen({ mode }: { mode: Mode }) {
   const { colours } = useTheme();
-  const signIn = usePreviewStore((state) => state.signIn);
+  const signIn = useAppStore((state) => state.signIn);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -75,55 +78,68 @@ export function AuthScreen({ mode }: { mode: Mode }) {
     setFailed(false);
   };
 
-  const submit = () => {
+  const submit = async () => {
     if (submitting.current) return;
+    const input = reset
+      ? { email }
+      : registration
+        ? { email, password, displayName: name, installationId: 'mobile' }
+        : { email, password, installationId: 'mobile' };
+    const checked = (reset ? forgotBody : registration ? registerBody : loginBody).safeParse(input);
     const next: Errors = {};
-    if (registration && !name.trim()) next.name = 'Tell us what to call you in this preview.';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
-      next.email = 'Enter an email like you@example.com.';
-    if (!reset && password.length < 8)
-      next.password = 'Use at least 8 characters for this sample password.';
-    if (registration && confirm !== password) next.confirm = 'The sample passwords need to match.';
+    if (!checked.success)
+      for (const issue of checked.error.issues) {
+        const field = issue.path[0] === 'displayName' ? 'name' : issue.path[0];
+        if (field === 'name' || field === 'email' || field === 'password')
+          next[field] = issue.message;
+      }
+    if (registration && confirm !== password) next.confirm = 'The passwords need to match.';
     setErrors(next);
-    const first = (['name', 'email', 'password', 'confirm'] as const).find((field) => next[field]);
+    const first = (['name', 'email', 'password', 'confirm'] as const).find((f) => next[f]);
     if (first) {
-      const refs = { name: nameRef, email: emailRef, password: passwordRef, confirm: confirmRef };
-      refs[first].current?.focus();
-      AccessibilityInfo.announceForAccessibility(next[first] ?? 'Check the highlighted field.');
+      ({ name: nameRef, email: emailRef, password: passwordRef, confirm: confirmRef })[
+        first
+      ].current?.focus();
       return;
     }
-    Keyboard.dismiss();
     submitting.current = true;
     setBusy(true);
     setFailed(false);
-    setStatus(reset ? 'Checking the sample email on this screen…' : 'Preparing your preview…');
-    // A short local UI transition, with no network request or credential persistence.
-    timer.current = setTimeout(() => {
-      setPassword('');
-      setConfirm('');
-      setShowPassword(false);
-      setBusy(false);
-      submitting.current = false;
-      if (reset) {
-        const message =
-          'Reset preview complete. Your email format looks valid. No email was sent and no password was changed.';
-        setStatus(message);
-        AccessibilityInfo.announceForAccessibility(message);
+    setStatus('Connecting securely?');
+    Keyboard.dismiss();
+    try {
+      if (isPreview) {
+        signIn(registration ? name : 'Preview explorer', email);
+        router.replace('/');
         return;
       }
-      try {
-        signIn(registration ? name.trim() : 'Preview explorer', email.trim());
-        AccessibilityInfo.announceForAccessibility(
-          'Your preview is ready. No real account was created.',
+      if (reset) {
+        await api.request(
+          '/auth/password/forgot',
+          { method: 'POST', body: JSON.stringify(forgotBody.parse({ email })) },
+          false,
         );
-        router.replace('/');
-      } catch {
-        setFailed(true);
-        setStatus('The preview could not open. Please try again. No real account was created.');
-        AccessibilityInfo.announceForAccessibility('The preview could not open. Please try again.');
-        emailRef.current?.focus();
+        setStatus('If the account is eligible, reset instructions will be sent.');
+      } else {
+        const reauth = session.getState().expired;
+        const same = await authenticate(
+          mode === 'register' ? 'register' : 'sign-in',
+          email,
+          password,
+          name,
+        );
+        setPassword('');
+        setConfirm('');
+        if (reauth && same && router.canGoBack()) router.back();
+        else router.replace('/');
       }
-    }, tokens.motion.transition * 2);
+    } catch (error) {
+      setFailed(true);
+      setStatus(error instanceof Error ? error.message : 'Please try again.');
+    } finally {
+      submitting.current = false;
+      setBusy(false);
+    }
   };
 
   return (
@@ -144,13 +160,15 @@ export function AuthScreen({ mode }: { mode: Mode }) {
       <Card style={styles.form}>
         <View style={[styles.disclosure, { backgroundColor: colours.raised }]}>
           <AppText variant="caption" colour="muted">
-            Design preview. No real account. Use sample details; nothing persists.
+            {isPreview
+              ? 'Design preview. Use sample details only.'
+              : 'Your account connects to Nivvi. Manual entries only; no bank connection.'}
           </AppText>
         </View>
         {registration && (
           <Input
             ref={nameRef}
-            label="Preview name"
+            label="Your name"
             value={name}
             onChangeText={(value) => change('name', value)}
             error={errors.name}
@@ -181,8 +199,8 @@ export function AuthScreen({ mode }: { mode: Mode }) {
           <>
             <Input
               ref={passwordRef}
-              label="Sample password"
-              hint="8+ characters; use a sample password."
+              label="Password"
+              hint={registration ? 'Use at least 12 characters.' : undefined}
               value={password}
               onChangeText={(value) => change('password', value)}
               error={errors.password}
@@ -199,7 +217,7 @@ export function AuthScreen({ mode }: { mode: Mode }) {
             {registration && (
               <Input
                 ref={confirmRef}
-                label="Confirm sample password"
+                label="Confirm password"
                 value={confirm}
                 onChangeText={(value) => change('confirm', value)}
                 error={errors.confirm}
@@ -215,7 +233,7 @@ export function AuthScreen({ mode }: { mode: Mode }) {
               />
             )}
             <Button
-              label={showPassword ? 'Hide sample password' : 'Show sample password'}
+              label={showPassword ? 'Hide password' : 'Show password'}
               variant="quiet"
               style={styles.passwordToggle}
               disabled={busy}
@@ -248,9 +266,16 @@ export function AuthScreen({ mode }: { mode: Mode }) {
             onPress={() => router.push('/reset-password')}
           />
         )}
+        {reset && (
+          <Button
+            label="I have a reset token"
+            variant="secondary"
+            onPress={() => router.push({ pathname: '/account-action', params: { mode: 'reset' } })}
+          />
+        )}
       </Card>
       <Button
-        label={registration || reset ? 'Back to sign in' : 'Create a preview profile'}
+        label={registration || reset ? 'Back to sign in' : 'Create an account'}
         variant="secondary"
         disabled={busy}
         onPress={() =>

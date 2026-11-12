@@ -1,0 +1,23 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+  id 'org.jetbrains.kotlin.plugin.compose' version '2.2.10'
+}
+
+group = 'com.nivvi.widget'
+version = '0.1.0'
+
+android {
+  namespace 'com.nivvi.widget'
+  buildFeatures {
+    compose true
+  }
+  defaultConfig {
+    minSdkVersion 24
+  }
+}
+
+dependencies {
+  implementation 'androidx.glance:glance:1.2.0'
+  implementation 'androidx.glance:glance-appwidget:1.2.0'
+}

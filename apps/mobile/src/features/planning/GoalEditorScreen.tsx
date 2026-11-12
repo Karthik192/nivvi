@@ -7,7 +7,7 @@ import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { amountInput } from '../preview/finance';
 import type { Goal } from '../preview/model';
-import { usePreviewStore } from '../preview/store';
+import { useAppStore } from '../../data/store';
 import { EmptyState, ErrorText, Page, Resource } from '../preview/ui';
 import { useUnsaved } from '../preview/useUnsaved';
 import { goalErrors, type FieldErrors } from './forms';
@@ -15,7 +15,7 @@ import { goalErrors, type FieldErrors } from './forms';
 export function GoalEditorScreen() {
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const id = typeof params.id === 'string' && params.id.trim() ? params.id : undefined;
-  const goal = usePreviewStore((state) => state.goals.find((item) => item.id === id));
+  const goal = useAppStore((state) => state.goals.find((item) => item.id === id));
   const invalid = params.id !== undefined && (!id || !goal);
   return (
     <Page
@@ -40,7 +40,8 @@ export function GoalEditorScreen() {
 }
 
 function GoalForm({ goal }: { goal?: Goal }) {
-  const saveGoal = usePreviewStore((state) => state.saveGoal);
+  const version = useRef(goal?.version);
+  const saveGoal = useAppStore((state) => state.saveGoal);
   const [name, setName] = useState(goal?.name ?? '');
   const [amount, setAmount] = useState(goal ? amountInput(goal.targetPaise) : '');
   const [date, setDate] = useState(goal?.targetDate ?? '');
@@ -64,7 +65,7 @@ function GoalForm({ goal }: { goal?: Goal }) {
     setError('');
     setErrors((previous) => ({ ...previous, [field]: '' }));
   };
-  const save = () => {
+  const save = async () => {
     if (submitting.current) return;
     submitting.current = true;
     const next = goalErrors(name, amount, date.trim());
@@ -80,7 +81,7 @@ function GoalForm({ goal }: { goal?: Goal }) {
       return;
     }
     try {
-      const id = saveGoal(name, amount, date.trim(), savedId);
+      const id = await saveGoal(name, amount, date.trim(), savedId, version.current);
       setSaved(true);
       setSavedId(id);
       unsaved.allowNavigation();

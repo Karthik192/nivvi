@@ -1,0 +1,268 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id              String             @id @default(uuid()) @db.Uuid
+  email           String             @unique
+  passwordHash    String
+  displayName     String
+  currency        String             @default("INR")
+  locale          String             @default("en-IN")
+  timezone        String             @default("Asia/Kolkata")
+  theme           String             @default("system")
+  emailVerifiedAt DateTime?          @db.Timestamptz(3)
+  status          String             @default("ACTIVE")
+  profileVersion  Int                @default(1)
+  createdAt       DateTime           @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime           @updatedAt @db.Timestamptz(3)
+  sessions        Session[]
+  accountTokens   AccountToken[]
+  categories      Category[]
+  transactions    Transaction[]
+  budgets         MonthlyBudget[]
+  allocations     CategoryBudget[]
+  goals           SavingsGoal[]
+  contributions   GoalContribution[]
+  syncState       SyncState?
+  changes         ChangeEvent[]
+  receipts        MutationReceipt[]
+  alerts          AlertDelivery[]
+  jobs            Job[]
+}
+
+model Session {
+  id              String              @id @default(uuid()) @db.Uuid
+  userId          String              @db.Uuid
+  installationId  String
+  familyExpiresAt DateTime            @db.Timestamptz(3)
+  revokedAt       DateTime?           @db.Timestamptz(3)
+  createdAt       DateTime            @default(now()) @db.Timestamptz(3)
+  lastUsedAt      DateTime            @default(now()) @db.Timestamptz(3)
+  user            User                @relation(fields: [userId], references: [id], onDelete: Restrict)
+  credentials     RefreshCredential[]
+
+  @@index([userId])
+}
+
+model RefreshCredential {
+  id         String    @id @default(uuid()) @db.Uuid
+  sessionId  String    @db.Uuid
+  tokenHash  String    @unique
+  parentId   String?   @db.Uuid
+  consumedAt DateTime? @db.Timestamptz(3)
+  expiresAt  DateTime  @db.Timestamptz(3)
+  createdAt  DateTime  @default(now()) @db.Timestamptz(3)
+  session    Session   @relation(fields: [sessionId], references: [id], onDelete: Restrict)
+
+  @@index([sessionId])
+}
+
+model AccountToken {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @db.Uuid
+  purpose    String
+  tokenHash  String    @unique
+  expiresAt  DateTime  @db.Timestamptz(3)
+  consumedAt DateTime? @db.Timestamptz(3)
+  createdAt  DateTime  @default(now()) @db.Timestamptz(3)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([userId, purpose])
+}
+
+model Category {
+  id             String           @id @default(uuid()) @db.Uuid
+  userId         String           @db.Uuid
+  kind           String
+  name           String
+  normalizedName String
+  iconKey        String
+  colourToken    String           @default("primary")
+  defaultKey     String?
+  archivedAt     DateTime?        @db.Timestamptz(3)
+  version        Int              @default(1)
+  deletedAt      DateTime?        @db.Timestamptz(3)
+  createdAt      DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime         @updatedAt @db.Timestamptz(3)
+  user           User             @relation(fields: [userId], references: [id], onDelete: Restrict)
+  transactions   Transaction[]
+  allocations    CategoryBudget[]
+
+  @@unique([userId, id])
+  @@unique([userId, kind, normalizedName])
+  @@unique([userId, defaultKey])
+}
+
+model Transaction {
+  id                String        @id @db.Uuid
+  userId            String        @db.Uuid
+  amountMinor       BigInt
+  currency          String        @default("INR")
+  type              String
+  categoryId        String        @db.Uuid
+  description       String?
+  merchantOrPayee   String?
+  paymentMethod     String
+  occurredAt        DateTime      @db.Timestamptz(3)
+  originalExpenseId String?       @db.Uuid
+  source            String        @default("MANUAL_APP")
+  version           Int           @default(1)
+  deletedAt         DateTime?     @db.Timestamptz(3)
+  createdAt         DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime      @updatedAt @db.Timestamptz(3)
+  user              User          @relation(fields: [userId], references: [id], onDelete: Restrict)
+  category          Category      @relation(fields: [userId, categoryId], references: [userId, id], onDelete: Restrict, onUpdate: NoAction)
+  originalExpense   Transaction?  @relation("Refunds", fields: [userId, originalExpenseId], references: [userId, id], onDelete: Restrict, onUpdate: NoAction)
+  refunds           Transaction[] @relation("Refunds")
+
+  @@unique([userId, id])
+  @@index([userId, occurredAt, id])
+  @@index([userId, categoryId, occurredAt, id])
+  @@index([userId, type, occurredAt, id])
+  @@index([userId, originalExpenseId])
+}
+
+model MonthlyBudget {
+  id          String           @id @db.Uuid
+  userId      String           @db.Uuid
+  month       DateTime         @db.Date
+  limitMinor  BigInt
+  currency    String           @default("INR")
+  version     Int              @default(1)
+  deletedAt   DateTime?        @db.Timestamptz(3)
+  createdAt   DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime         @updatedAt @db.Timestamptz(3)
+  user        User             @relation(fields: [userId], references: [id], onDelete: Restrict)
+  allocations CategoryBudget[]
+
+  @@unique([userId, id])
+  @@index([userId, month])
+}
+
+model CategoryBudget {
+  id              String        @id @db.Uuid
+  userId          String        @db.Uuid
+  monthlyBudgetId String        @db.Uuid
+  categoryId      String        @db.Uuid
+  limitMinor      BigInt
+  version         Int           @default(1)
+  deletedAt       DateTime?     @db.Timestamptz(3)
+  createdAt       DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime      @updatedAt @db.Timestamptz(3)
+  user            User          @relation(fields: [userId], references: [id], onDelete: Restrict)
+  budget          MonthlyBudget @relation(fields: [userId, monthlyBudgetId], references: [userId, id], onDelete: Restrict, onUpdate: NoAction)
+  category        Category      @relation(fields: [userId, categoryId], references: [userId, id], onDelete: Restrict, onUpdate: NoAction)
+
+  @@unique([userId, id])
+  @@index([userId, monthlyBudgetId])
+  @@index([userId, categoryId])
+}
+
+model SavingsGoal {
+  id            String             @id @db.Uuid
+  userId        String             @db.Uuid
+  name          String
+  targetMinor   BigInt
+  currency      String             @default("INR")
+  targetDate    DateTime?          @db.Date
+  iconKey       String             @default("goal")
+  archivedAt    DateTime?          @db.Timestamptz(3)
+  version       Int                @default(1)
+  deletedAt     DateTime?          @db.Timestamptz(3)
+  createdAt     DateTime           @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime           @updatedAt @db.Timestamptz(3)
+  user          User               @relation(fields: [userId], references: [id], onDelete: Restrict)
+  contributions GoalContribution[]
+
+  @@unique([userId, id])
+  @@index([userId, createdAt, id])
+}
+
+model GoalContribution {
+  id            String      @id @db.Uuid
+  userId        String      @db.Uuid
+  goalId        String      @db.Uuid
+  amountMinor   BigInt
+  contributedAt DateTime    @db.Timestamptz(3)
+  note          String?
+  version       Int         @default(1)
+  deletedAt     DateTime?   @db.Timestamptz(3)
+  createdAt     DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime    @updatedAt @db.Timestamptz(3)
+  user          User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  goal          SavingsGoal @relation(fields: [userId, goalId], references: [userId, id], onDelete: Restrict, onUpdate: NoAction)
+
+  @@unique([userId, id])
+  @@index([userId, goalId, contributedAt, id])
+}
+
+model SyncState {
+  userId       String @id @db.Uuid
+  lastSequence BigInt @default(0)
+  user         User   @relation(fields: [userId], references: [id], onDelete: Restrict)
+}
+
+model ChangeEvent {
+  userId        String   @db.Uuid
+  sequence      BigInt
+  entityType    String
+  entityId      String   @db.Uuid
+  entityVersion Int
+  operation     String
+  payload       Json
+  recordedAt    DateTime @default(now()) @db.Timestamptz(3)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@id([userId, sequence])
+}
+
+model MutationReceipt {
+  userId      String   @db.Uuid
+  operationId String   @db.Uuid
+  requestHash String
+  entityId    String?  @db.Uuid
+  result      Json
+  status      Int
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@id([userId, operationId])
+}
+
+model Job {
+  id            String    @id @default(uuid()) @db.Uuid
+  userId        String    @db.Uuid
+  type          String
+  payload       Json
+  dedupeKey     String    @unique
+  attempts      Int       @default(0)
+  nextAttemptAt DateTime  @default(now()) @db.Timestamptz(3)
+  lockedUntil   DateTime? @db.Timestamptz(3)
+  status        String    @default("PENDING")
+  createdAt     DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime  @updatedAt @db.Timestamptz(3)
+  user          User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([status, nextAttemptAt])
+}
+
+model AlertDelivery {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @db.Uuid
+  month      String
+  categoryId String?  @db.Uuid
+  threshold  Int
+  dedupeKey  String   @unique
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([userId, month])
+}

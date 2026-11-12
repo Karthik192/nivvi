@@ -1,4 +1,5 @@
 import { ActivityIndicator, Pressable, StyleSheet, type PressableProps } from 'react-native';
+import { useRef, useState } from 'react';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { tokens, useTheme } from '../../design/theme';
 import { useMotion } from '../../design/useMotion';
@@ -18,14 +19,18 @@ export function Button({
   style,
   onPressIn,
   onPressOut,
+  onPress,
   accessibilityState,
   ...props
 }: Props) {
   const { colours } = useTheme();
   const { reduced } = useMotion();
   const scale = useSharedValue(1);
+  const pending = useRef(false);
+  const [waiting, setWaiting] = useState(false);
+  const [failure, setFailure] = useState('');
   const motionStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.get() }] }));
-  const unavailable = disabled || busy;
+  const unavailable = disabled || busy || waiting;
   const backgroundColor = unavailable
     ? colours.disabled
     : variant === 'primary'
@@ -50,8 +55,26 @@ export function Button({
         {...props}
         accessibilityRole="button"
         accessibilityLabel={label}
-        accessibilityState={{ ...accessibilityState, disabled: Boolean(unavailable), busy }}
+        accessibilityState={{
+          ...accessibilityState,
+          disabled: Boolean(unavailable),
+          busy: Boolean(busy || waiting),
+        }}
         disabled={unavailable}
+        onPress={async (event) => {
+          if (pending.current) return;
+          pending.current = true;
+          setWaiting(true);
+          setFailure('');
+          try {
+            await onPress?.(event);
+          } catch (error) {
+            setFailure(error instanceof Error ? error.message : 'Please try again.');
+          } finally {
+            pending.current = false;
+            setWaiting(false);
+          }
+        }}
         onPressIn={(event) => {
           scale.set(
             withTiming(reduced ? 1 : tokens.motion.pressScale, {
@@ -78,6 +101,11 @@ export function Button({
           {label}
         </AppText>
       </Pressable>
+      {failure && (
+        <AppText colour="danger" accessibilityRole="alert">
+          {failure}
+        </AppText>
+      )}
     </Animated.View>
   );
 }

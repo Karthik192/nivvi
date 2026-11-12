@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "packages/*"
   ],
   "overrides": {
     "react": "19.3.0",
@@ -15,11 +16,12 @@
   "scripts": {
     "mobile": "npm run start --workspace @nivvi/mobile",
     "android": "npm run android --workspace @nivvi/mobile",
-    "typecheck": "npm run typecheck --workspaces --if-present",
+    "typecheck": "npm run build --workspace @nivvi/contracts && npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "format:check": "prettier --check apps/mobile package.json .prettierrc.json",
-    "design:verify": "node design/verify.mjs"
+    "format:check": "prettier --check apps/mobile apps/backend packages/contracts package.json .prettierrc.json",
+    "design:verify": "node design/verify.mjs",
+    "production:verify": "node scripts/verify-production-build.mjs"
   },
   "devDependencies": {
     "prettier": "3.9.10"

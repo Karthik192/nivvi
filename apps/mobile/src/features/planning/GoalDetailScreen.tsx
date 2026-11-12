@@ -8,14 +8,14 @@ import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { dateLabel, goalSaved, money, parseAmount, progressPercent } from '../preview/finance';
 import type { Goal } from '../preview/model';
-import { usePreviewStore } from '../preview/store';
+import { useAppStore } from '../../data/store';
 import { Confirmation, EmptyState, ErrorText, Meter, Page, Resource, Section } from '../preview/ui';
 import { useUnsaved } from '../preview/useUnsaved';
 
 export function GoalDetailScreen() {
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const id = typeof params.id === 'string' ? params.id : undefined;
-  const goal = usePreviewStore((state) => state.goals.find((item) => item.id === id));
+  const goal = useAppStore((state) => state.goals.find((item) => item.id === id));
   return (
     <Page title={goal?.name ?? 'Your goal'} subtitle="Small steps, at your pace." back>
       <Resource>
@@ -35,7 +35,7 @@ export function GoalDetailScreen() {
 }
 
 function GoalDetail({ goal }: { goal: Goal }) {
-  const { contribute, removeContribution, deleteGoal } = usePreviewStore();
+  const { contribute, removeContribution, deleteGoal } = useAppStore();
   const [amount, setAmount] = useState('');
   const [amountError, setAmountError] = useState('');
   const submitting = useRef(false);
@@ -53,13 +53,13 @@ function GoalDetail({ goal }: { goal: Goal }) {
   const saved = goalSaved(goal);
   const reached = saved >= goal.targetPaise;
   const percent = progressPercent(saved, goal.targetPaise);
-  const add = () => {
+  const add = async () => {
     if (submitting.current) return;
     submitting.current = true;
     setAmountError('');
     try {
       parseAmount(amount);
-      contribute(goal.id, amount);
+      await contribute(goal.id, amount);
       setAmount('');
       setAdded(true);
       Keyboard.dismiss();
@@ -71,13 +71,13 @@ function GoalDetail({ goal }: { goal: Goal }) {
       submitting.current = false;
     }
   };
-  const remove = () => {
+  const remove = async () => {
     try {
       if (pending?.kind === 'goal') {
-        deleteGoal(goal.id);
+        await deleteGoal(goal.id);
         unsaved.allowNavigation();
         router.replace('/(tabs)/goals');
-      } else if (pending) removeContribution(goal.id, pending.id);
+      } else if (pending) await removeContribution(goal.id, pending.id);
       setPending(null);
     } catch (caught) {
       setError((caught as Error).message);
@@ -144,7 +144,7 @@ function GoalDetail({ goal }: { goal: Goal }) {
           <AppText colour="positive" accessibilityLiveRegion="polite">
             {reached
               ? 'You reached your goal. A little, further.'
-              : 'Contribution added to your preview goal.'}{' '}
+              : 'Contribution added to your goal.'}{' '}
             No money was moved.
           </AppText>
         )}

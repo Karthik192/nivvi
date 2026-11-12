@@ -11,12 +11,19 @@ export function readEnvironment(input: {
   const apiBaseUrl = input.EXPO_PUBLIC_API_BASE_URL?.trim() || null;
   if (apiBaseUrl) {
     const url = new URL(apiBaseUrl);
-    if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) {
+    if (
+      !['http:', 'https:'].includes(url.protocol) ||
+      url.username ||
+      url.password ||
+      url.search ||
+      url.hash
+    ) {
       throw new Error('API URL must be HTTP(S) without embedded credentials.');
     }
     if (environment === 'production' && url.protocol !== 'https:') {
       throw new Error('Production API URL must use HTTPS.');
     }
   }
-  return { environment: environment as AppEnvironment, apiBaseUrl };
+  const normalizedApiBaseUrl = apiBaseUrl?.replace(/\/$/, '').replace(/\/api\/v1$/i, '') ?? null;
+  return { environment: environment as AppEnvironment, apiBaseUrl: normalizedApiBaseUrl };
 }

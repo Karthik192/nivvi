@@ -1,4 +1,46 @@
-# Phase 2 dependency compatibility record
+# Dependency compatibility record
+
+## Phase 6 offline dependencies — 12 November 2026
+
+Expo was updated to SDK `58.0.24`; `npx expo install --check` now passes with all SDK-owned modules at their expected compatible versions. Added `expo-sqlite ~58.0.16`, `expo-background-task ~58.0.13`, `expo-network ~58.0.5` and `expo-task-manager ~58.0.14`, selected by `npx expo install`. SQLCipher is enabled through the Expo SQLite config plugin; native startup checks `PRAGMA cipher_version` before permitting offline storage. Background Task uses the SDK 58 API and a 15-minute minimum interval, subject to OS scheduling. Expo SDK documentation was checked before installation; no forced peer resolution or React Native upgrade was used.
+
+The Windows native plugin selects already-installed CMake 4.1.2/Ninja 1.12.1 to avoid Ninja's prior 260-character path failure. CMake 4 rejects Expo SQLite's legacy 3.4.1 minimum by default, so its external build receives `CMAKE_POLICY_VERSION_MINIMUM=3.5`. The plugin also overrides React Native's AGP catalog to 9.1.1 for the installed Android Studio's supported range. A clean Expo prebuild and full debug APK build are used to verify these generated settings; the Android generated tree remains ignored.
+
+Sources: [Expo SQLite SDK 58](https://docs.expo.dev/versions/v58.0.0/sdk/sqlite/), [Expo BackgroundTask SDK 58](https://docs.expo.dev/versions/v58.0.0/sdk/background-task/), [Expo Network SDK 58](https://docs.expo.dev/versions/v58.0.0/sdk/network/), [Gradle version catalog override](https://docs.gradle.org/current/userguide/version_catalogs.html).
+## Phase 5 mobile integration — 11 November 2026
+
+Added exact pins `@tanstack/react-query` **5.107.1**, `expo-secure-store` **58.0.2** and `expo-crypto` **58.0.7**, plus the local `@nivvi/contracts` workspace. The earlier Expo 58.0.23 SDK's bundled-native-module map selects the SecureStore/Crypto 58 lines; both declare Expo peers, and TanStack Query declares React 18/19 support, covering the installed React 19.3.0. No forced peer resolution or Expo/React Native upgrade was used. The SecureStore config plugin is committed in app configuration; generated native trees remain ignored.
+
+The Android x86_64 development build with these native modules passed in 6m33s (775 tasks) and installed on the API 34 emulator. Actual secure-session restoration and live flow results belong in PHASE_5_REVIEW.md. Hermes exposed that this runtime's Intl number formatter rejects BigInt even though JavaScript arithmetic supports it; exact INR report formatting now groups integer strings directly, without a floating-point conversion or another dependency.
+
+Metro reports that newer Expo 58 patch packages are available. Those are an upgrade follow-up, not a reason to force unrelated package changes during integration. The exact installed lockfile and native validation define this phase's tested combination. The existing 33 advisory inventory remains open; production dependency/reachability review is still required.
+
+Sources checked before installing: [TanStack Query React Native guidance](https://tanstack.com/query/latest/docs/framework/react/react-native), [Expo SDK 58 SecureStore](https://docs.expo.dev/versions/v58.0.0/sdk/securestore/), [Expo Crypto](https://docs.expo.dev/versions/latest/sdk/crypto/), installed SDK bundled-native-module metadata and npm package peer metadata.
+
+## Phase 4 backend selection — 11 November 2026
+
+Backend pins were checked against package engines and official documentation before installation. Node 22.14.0/npm 10.9.2 is the verified workstation pair. Mobile packages and native configuration were not changed.
+
+| Area                                     | Exact selected versions                                      |
+| ---------------------------------------- | ------------------------------------------------------------ |
+| HTTP / validation                        | Express 5.3.0 / Zod 4.6.7                                    |
+| Prisma CLI / client / PostgreSQL adapter | 7.10.1 / 7.10.1 / 7.10.1                                     |
+| PostgreSQL / driver                      | Official EDB Windows PostgreSQL 18.6 binaries / pg 8.23.1    |
+| Passwords / JWT                          | argon2 0.45.2 / jose 6.2.17                                  |
+| HTTP protections                         | helmet 8.3.0 / express-rate-limit 8.7.4                      |
+| Logs / mail / timezone                   | pino 10.4.0 / nodemailer 10.5.0 / luxon 3.7.2                |
+| Test / TypeScript execution              | Node test runner, supertest 7.3.2 / tsx 4.23.15              |
+| Type / lint tooling                      | TypeScript 6.0.3 / ESLint 10.14.0 / typescript-eslint 8.72.2 |
+
+The Prisma CLI's `latest` tag resolved to 8.0.0-rc.33 requiring Node 22.18+, while the selected stable client is 7.10.1. CLI, client and adapter are explicitly pinned to stable 7.10.1, whose engines include Node 22.12+. No forced peer resolution or Node upgrade was used. Prisma 7 uses `prisma.config.ts` for the migration URL, a generated ESM client and the pg driver adapter; the runtime URL uses a separate role from migrations. Generate the ignored client after `npm ci`.
+
+The local server uses the official portable Windows archive linked through PostgreSQL/EDB, extracted under ignored `.local/tools`. These binaries are not committed, deployed or installed as a system service. Database integration results belong in PHASE_4_REVIEW.md; compatibility is not a production certification.
+
+After adding backend dependencies, `npm audit --json` still reports **33 advisories: 1 low, 32 moderate, 0 high/critical** across the combined workspace. Existing transitive toolchain findings remain open; no forced audit fix was applied. The exact lockfile remains authoritative.
+
+Sources: [Prisma 7 system requirements](https://www.prisma.io/docs/orm/v7/reference/system-requirements), [Prisma PostgreSQL support](https://www.prisma.io/docs/orm/v7/core-concepts/supported-databases/postgresql), [PostgreSQL Windows distributions](https://www.postgresql.org/download/windows/), [EDB portable binaries](https://www.enterprisedb.com/download-postgresql-binaries). Package engine metadata was also checked through npm before installation.
+
+## Earlier mobile validation
 
 Windows Studio build follow-up (10 November 2026): Studio has been upgraded to 2026.2.2, resolving the AGP 9.2.1 IDE mismatch. Its default Gradle cache did not contain the CMake override used by prior command-line builds, exposing Ninja 1.10.2's 260-character path limit again. The new Windows-only `with-windows-cmake.cjs` config plugin selects the already installed SDK CMake 4.1.2/Ninja 1.12.1 in generated project properties. Other hosts keep Expo defaults; no dependency versions changed. Prebuild was run twice and retained one CMake property. Plugin regression tests cover both non-Windows hosts and repeat application while preserving unrelated Gradle properties. All 37 Jest tests, type checking, lint and formatting pass. ARM64 debug assembly passed with Studio's default Gradle cache in 9m24s (537 tasks); see [native build record](review/phase3/native-build-arm64-cmake.json). This fix did not install or run the ARM64 APK on a device.
 
@@ -18,22 +60,22 @@ Checked official Expo SDK reference, Router/manual setup, Reanimated, Gesture Ha
 
 Exact full inventory: [installed versions](review/phase2/installed-versions.json). npm lockfile is the reproducibility source; no forced peer-dependency resolution was used.
 
-| Area | Installed / observed |
-| --- | --- |
-| Expo / React Native / React | 58.0.23 / 0.88.1 / 19.3.0 |
-| Router / development client | 58.0.30 / 58.0.18 |
-| Reanimated / Worklets / Gesture Handler | 4.7.1 / 0.13.0 / 3.3.0 |
-| Rive / Nitro | 0.5.12 / 0.36.5; native Rive Android SDK 11.16.0 configured; no authored `.riv` rendered |
-| SVG / Safe Area / Screens | 15.16.0 / 5.11.1 / 4.30.1 |
-| Font / Manrope / Zustand | expo-font 58.0.11 / font package 0.4.3 / 5.1.0 |
-| TypeScript / config loader | 6.0.3 / tsx 4.23.15 |
-| Jest / jest-expo | 30.5.2 / 58.0.14 |
-| ESLint / TypeScript ESLint / React hooks | 10.14.0 / 8.72.2 / 7.1.1 |
-| Prettier | 3.9.10 |
-| Android tools | Android Studio JBR 21.0.10, Gradle 9.4.1; RN build plugin provisions JDK 17 toolchain |
-| Windows native build tool | CMake 4.1.2 / Ninja 1.12.1, selected in project-local Gradle user properties; OS long paths already enabled |
-| Android native configuration | min API 24, compile API 37, target API 36, NDK 27.1.12297006, Kotlin plugin 2.2.10 |
-| Emulator | existing Pixel_7 AVD, Android 14/API 34, x86_64; debug app built, installed and rendered |
+| Area                                     | Installed / observed                                                                                        |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Expo / React Native / React              | 58.0.23 / 0.88.1 / 19.3.0                                                                                   |
+| Router / development client              | 58.0.30 / 58.0.18                                                                                           |
+| Reanimated / Worklets / Gesture Handler  | 4.7.1 / 0.13.0 / 3.3.0                                                                                      |
+| Rive / Nitro                             | 0.5.12 / 0.36.5; native Rive Android SDK 11.16.0 configured; no authored `.riv` rendered                    |
+| SVG / Safe Area / Screens                | 15.16.0 / 5.11.1 / 4.30.1                                                                                   |
+| Font / Manrope / Zustand                 | expo-font 58.0.11 / font package 0.4.3 / 5.1.0                                                              |
+| TypeScript / config loader               | 6.0.3 / tsx 4.23.15                                                                                         |
+| Jest / jest-expo                         | 30.5.2 / 58.0.14                                                                                            |
+| ESLint / TypeScript ESLint / React hooks | 10.14.0 / 8.72.2 / 7.1.1                                                                                    |
+| Prettier                                 | 3.9.10                                                                                                      |
+| Android tools                            | Android Studio JBR 21.0.10, Gradle 9.4.1; RN build plugin provisions JDK 17 toolchain                       |
+| Windows native build tool                | CMake 4.1.2 / Ninja 1.12.1, selected in project-local Gradle user properties; OS long paths already enabled |
+| Android native configuration             | min API 24, compile API 37, target API 36, NDK 27.1.12297006, Kotlin plugin 2.2.10                          |
+| Emulator                                 | existing Pixel_7 AVD, Android 14/API 34, x86_64; debug app built, installed and rendered                    |
 
 ### Decisions found during installation
 

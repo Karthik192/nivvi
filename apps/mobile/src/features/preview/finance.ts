@@ -1,15 +1,19 @@
 import type { Budget, Category, Goal, Transaction, TransactionDraft } from './model';
 
-export const MAX_AMOUNT_PAISE = 99_999_999_999;
+export const MAX_AMOUNT_PAISE = 999_999_999_999;
 export function parseAmount(input: string): number {
   const value = input.trim();
-  if (!/^\d{1,9}(\.\d{1,2})?$/.test(value))
+  if (!/^\d{1,10}(\.\d{1,2})?$/.test(value))
     throw new Error('Enter rupees with up to two decimal places.');
   const [whole = '0', decimal = ''] = value.split('.');
   const paise = Number(whole) * 100 + Number(decimal.padEnd(2, '0'));
   if (!Number.isSafeInteger(paise) || paise <= 0 || paise > MAX_AMOUNT_PAISE)
-    throw new Error('Enter an amount above ₹0 and below ₹1,00,00,00,000.');
+    throw new Error('Enter an amount from ₹0.01 to ₹9,99,99,99,999.99.');
   return paise;
+}
+export function parseLimit(input: string): number {
+  if (input.trim() === '0' || input.trim() === '0.0' || input.trim() === '0.00') return 0;
+  return parseAmount(input);
 }
 export const amountInput = (paise: number) => (paise / 100).toFixed(2);
 export function money(paise: number) {
@@ -71,6 +75,19 @@ export function totals(records: Transaction[], month: string) {
     count: selected.length,
   };
 }
+export function exactTotals(records: Transaction[], month: string) {
+  const selected = records.filter((record) => record.date.startsWith(`${month}-`));
+  const sum = (type: Transaction['type']) => selected
+    .filter((record) => record.type === type)
+    .reduce((value, record) => value + BigInt(record.amountPaise), 0n);
+  const income=sum('income');
+  const gross=sum('expense');
+  const refunds=sum('refund');
+  return {
+    income:income.toString(), gross:gross.toString(), refunds:refunds.toString(),
+    expenses:(gross-refunds).toString(), surplus:(income-gross+refunds).toString(), count:selected.length,
+  };
+}
 export function categorySpending(records: Transaction[], month: string, categoryId: string) {
   return records
     .filter(
@@ -85,6 +102,7 @@ export function categorySpending(records: Transaction[], month: string, category
     );
 }
 export const goalSaved = (goal: Goal) =>
+  goal.savedPaise ??
   goal.contributions.reduce((sum, contribution) => sum + contribution.amountPaise, 0);
 export const progressPercent = (amount: number, limit: number) =>
   limit > 0 ? Math.max(0, Math.min(100, (amount / limit) * 100)) : 0;
@@ -159,9 +177,7 @@ export function validateTransaction(
 export function validateBudget(budget: Budget) {
   if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(budget.month)) throw new Error('Use a valid budget month.');
   const limits = [budget.limitPaise, ...Object.values(budget.categoryLimits)];
-  if (
-    limits.some((limit) => !Number.isSafeInteger(limit) || limit <= 0 || limit > MAX_AMOUNT_PAISE)
-  )
+  if (limits.some((limit) => !Number.isSafeInteger(limit) || limit < 0 || limit > MAX_AMOUNT_PAISE))
     throw new Error('Budget limits must be positive rupee amounts.');
   if (
     Object.values(budget.categoryLimits).reduce((sum, value) => sum + value, 0) > budget.limitPaise

@@ -1,10 +1,52 @@
-# Session handoff — Phase 3
+# Current handoff — Phase 7
+
+The latest continuation started Phase 7. Initial Android Glance widget implementation is ready for review; read [PHASE_7_REVIEW.md](PHASE_7_REVIEW.md). AndroidX Glance Kotlin compile and full x86_64 debug APK build passed on 12 November 2026. Mobile TypeScript, ESLint and 53 Jest tests passed. The emulator widget could not be exercised in this session because the local ADB command did not return. The widget's amount/category buttons open the existing transaction form; there is no native direct-save inbox. Stop here for explicit Phase 7 approval before Phase 8. Do not commit, push or deploy without a separate instruction.
+
+The earlier Phase 6 handoff below is historical; consult [PHASE_6_REVIEW.md](PHASE_6_REVIEW.md) for its evidence and limitations.
+
+# Historical handoff — Phase 6
+
+## Current Phase 6 handoff
+
+The user's latest `continue` approved Phase 6 only. Offline implementation is complete and under review; see [PHASE_6_REVIEW.md](PHASE_6_REVIEW.md). Server sync endpoints, SQLCipher SQLite, account-scoped transaction outbox, conflict UI and best-effort background scheduling are implemented. PostgreSQL suite: 68 passed. Mobile tests and Android build/device verification are being finalized. Do not begin Phase 7 until explicit approval. Do not commit, push or deploy without a separate instruction.
+
+Native Android is generated from `apps/mobile/app.config.ts`; `android/` is ignored. The Windows plugin sets CMake 4.1.2, adds the Expo SQLite CMake policy compatibility argument and overrides the AGP catalog to 9.1.1 for Android Studio compatibility. `android/local.properties` was recreated for this workstation. Use SDK/JBR from Android Studio. Do not run prebuild with `--clean` unless deliberately regenerating the ignored native project.
+
+Offline details and limits are documented in the Phase 6 review: transactions/refunds are offline writable; categories/transactions cache locally; budgets/goals remain online-only; background scheduling is deferred; event pruning/cursor expiry and two-device/device-loss acceptance remain future work.
+
+## Historical Phase 5 handoff
+
+## Current Phase 5 handoff
+
+The user approved Phase 5 with a continuation after the Phase 4 completion report. Live mobile integration was implemented; read PHASE_5_REVIEW.md for automated results and partial emulator review. Phase 4 and Phase 5 changes are local/uncommitted.
+
+Phase 5 implementation note: mobile data code lives in `apps/mobile/src/data`, with API transport, DTO mappings, online projection store and live screens. Phase 6 adds native SQLite/outbox and sync.
+
+Backend now supports atomic PUT `/api/v1/budget-plans/:month` with parent/allocation versions and transaction-list `originalExpenseId` filtering. Initial PostgreSQL migration is unchanged. Actual mobile HTTP transport was exercised against a real test database, including a deliberately lost response after commit, shared token rotation and report totals.
+
+Local `.local/phase5-account.json` contains native smoke-test credentials; never print/commit it. Earlier interrupted registration attempts created synthetic users in the local development DB. Do not reset or delete the database to clean up test artifacts. Final emulator evidence and limitations belong in PHASE_5_REVIEW.md.
+
+The remaining Phase 4 and Phase 3 notes are historical context. Inspect processes before reusing old session IDs.
+
+## Current Phase 4 handoff
+
+The user approved continuation into Phase 4. The separate Express/PostgreSQL backend is implemented under `apps/backend`, with shared strict request contracts under `packages/contracts`. Review PHASE_4_REVIEW.md for actual checks and limitations. Stop for Phase 5 approval; the mobile app is still the Phase 3 in-memory preview. Do not connect it, implement SQLite/sync/widget infrastructure or deploy under this authorization.
+
+Node 22.14.0, stable Prisma CLI/client/pg adapter 7.10.1, PostgreSQL 18.6. Portable official PostgreSQL binaries are ignored under `.local/tools/postgresql/pgsql/bin`. `scripts/setup-backend-local.ps1` initializes/starts the localhost-only cluster on port 55432 with separate development/test databases and least-privilege runtime/migrator roles. It writes ignored `.env.local` / `.env.test.local`; never print or commit their contents. Preserve `.local/backend/pgdata` and its private setup state; no destructive reset.
+
+After `npm ci`, generate Prisma with `npm run db:generate --workspace @nivvi/backend`; run both migration scripts before database tests. Backend operations and contracts are in `apps/backend/README.md`. Root tests now require the local PostgreSQL test database; mobile tests can run independently. Local file mail is explicitly not sent; actual SMTP delivery remains unverified. Pending deletion requests revoke access but have no approved purge worker/retention schedule.
+
+Last published commit before Phase 4: `4ea9008448f75c6054e2d9aa231e10b1a9a7bcb1` on `main`, remote `https://github.com/Karthik192/nivvi.git`. Phase 4 changes are local until a new explicit commit/push instruction. No Phase 5, deployment or publishing authorization is implied. Preserve the five user recommendations and the once-per-task notification in CLAUDE.md.
+
+The remaining sections are historical Phase 3/native operational context; their original Phase 4 approval restriction has been superseded by the continuation above. Inspect current processes before reusing historical session IDs.
+
+## Historical Phase 3 context
 
 ## Current state
 
 Phase 3 interactive frontend is implemented. Review docs/PHASE_3_REVIEW.md and docs/review/phase3/README.md for actual validation and limitations. Stop for explicit Phase 4 approval. Do not implement backend, real authentication, SQLite, synchronization, widgets or deployment under this phase.
 
-The product routes cover onboarding/auth previews, Home, expenses/income/refunds, History, details, categories, budgets, goals, Insights, profile and settings. Existing Studio/Motion demonstrations remain under Preview tools. All records and credentials are explicitly a development preview; records are in memory and reset on restart/sign-out. Passwords are transient and never sent or retained. Production routes are guarded by __DEV__ and production initialization does not seed fixtures. This is not a real authentication boundary.
+The product routes cover onboarding/auth previews, Home, expenses/income/refunds, History, details, categories, budgets, goals, Insights, profile and settings. Existing Studio/Motion demonstrations remain under Preview tools. All records and credentials are explicitly a development preview; records are in memory and reset on restart/sign-out. Passwords are transient and never sent or retained. Production routes are guarded by **DEV** and production initialization does not seed fixtures. This is not a real authentication boundary.
 
 No dependency was added. Preserve the five user recommendations in CLAUDE.md. Original .riv assets remain absent; original static Nim is the implemented fallback. Native Rive registration/build compatibility does not establish rendering or binding acceptance.
 

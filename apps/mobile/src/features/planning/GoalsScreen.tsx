@@ -4,11 +4,11 @@ import { AppText } from '../../components/ui/AppText';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { dateLabel, goalSaved, money } from '../preview/finance';
-import { usePreviewStore } from '../preview/store';
+import { useAppStore } from '../../data/store';
 import { EmptyState, Meter, Page, Resource } from '../preview/ui';
 
 export function GoalsScreen() {
-  const goals = usePreviewStore((state) => state.goals);
+  const goals = useAppStore((state) => state.goals);
   const saved = goals.reduce((sum, goal) => sum + goalSaved(goal), 0);
   return (
     <Page title="A little closer" subtitle="Make room for the things you’re looking forward to.">

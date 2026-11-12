@@ -4,9 +4,12 @@ import { runInNewContext } from 'node:vm';
 
 type Property = { type: string; key?: string; value: string };
 type ModResult = { modResults: Property[] };
+type FileModResult = { modResults: { contents: string } };
 
 function loadPlugin(platform: string) {
   let mod: ((result: ModResult) => ModResult) | undefined;
+  let settingsMod: ((result: FileModResult) => FileModResult) | undefined;
+  let projectMod: ((result: FileModResult) => FileModResult) | undefined;
   const output = { exports: undefined as unknown };
   runInNewContext(
     readFileSync(resolve(__dirname, '../../plugins/with-windows-cmake.cjs'), 'utf8'),
@@ -20,6 +23,8 @@ function loadPlugin(platform: string) {
             mod = action;
             return config;
           },
+          withSettingsGradle: (config: object, action: (result: FileModResult) => FileModResult) => { settingsMod = action; return config; },
+          withProjectBuildGradle: (config: object, action: (result: FileModResult) => FileModResult) => { projectMod = action; return config; },
         };
       },
     },
@@ -31,6 +36,10 @@ function loadPlugin(platform: string) {
       return mod({ modResults: properties }).modResults;
     },
     registered: () => Boolean(mod),
+    nativeGradle: () => ({
+      settings: settingsMod?.({modResults:{contents:'expoAutolinking.useExpoVersionCatalog()'}}).modResults.contents,
+      project: projectMod?.({modResults:{contents:'allprojects {}'}}).modResults.contents,
+    }),
   };
 }
 
@@ -58,5 +67,8 @@ describe('Windows native build tool selection', () => {
       ...retained,
       { type: 'property', key: 'android.cmakeVersion', value: '4.1.2' },
     ]);
+    const native = plugin.nativeGradle();
+    expect(native.settings).toContain("version('agp', '9.1.1')");
+    expect(native.project).toContain('CMAKE_POLICY_VERSION_MINIMUM=3.5');
   });
 });

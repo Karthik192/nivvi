@@ -1,0 +1,9 @@
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+  android:minWidth="250dp"
+  android:minHeight="170dp"
+  android:targetCellWidth="3"
+  android:targetCellHeight="2"
+  android:updatePeriodMillis="0"
+  android:resizeMode="horizontal|vertical"
+  android:widgetCategory="home_screen"
+  android:description="@string/nivvi_widget_description" />

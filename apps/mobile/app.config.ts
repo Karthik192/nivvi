@@ -20,6 +20,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     plugins: [
       'expo-router',
       'expo-font',
+      'expo-secure-store',
+      'expo-splash-screen',
+      'expo-status-bar',
+      ['expo-sqlite', { useSQLCipher: true }],
+      'expo-background-task',
       'expo-dev-client',
       './plugins/with-font-scale.cjs',
       './plugins/with-windows-cmake.cjs',
@@ -39,8 +44,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     extra: {
       environment: environment.environment,
       ...(environment.apiBaseUrl ? { apiBaseUrl: environment.apiBaseUrl } : {}),
-      phase: 3,
-      previewOnly: true,
+      phase: 7,
+      previewOnly: development && process.env.EXPO_PUBLIC_DATA_MODE === 'preview',
       originalRiveAssetReady: false,
     },
   };

@@ -1,3 +1,5 @@
+import { isPreview } from '../../data/runtime';
+import { OnlineHistory } from '../../data/OnlineScreens';
 import { useMemo, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import { router } from 'expo-router';
@@ -8,13 +10,16 @@ import { Screen } from '../../components/ui/Screen';
 import { Page, PageHeader, MonthPicker, Row, Chip, EmptyState, Resource } from '../preview/ui';
 import { currentMonth, money, monthName, totals } from '../preview/finance';
 import { paymentMethods, type TransactionType } from '../preview/model';
-import { usePreviewStore } from '../preview/store';
+import { useAppStore } from '../../data/store';
 import { TransactionRow } from './TransactionRow';
 
 export function HistoryScreen() {
-  const records = usePreviewStore((state) => state.transactions);
-  const categories = usePreviewStore((state) => state.categories);
-  const scenario = usePreviewStore((state) => state.scenario);
+  return isPreview ? <PreviewHistoryScreen /> : <OnlineHistory />;
+}
+function PreviewHistoryScreen() {
+  const records = useAppStore((state) => state.transactions);
+  const categories = useAppStore((state) => state.categories);
+  const scenario = useAppStore((state) => state.scenario);
   const [month, setMonth] = useState(currentMonth);
   const [query, setQuery] = useState('');
   const [type, setType] = useState<TransactionType | 'all'>('all');
@@ -187,7 +192,7 @@ export function HistoryScreen() {
         ListEmptyComponent={
           <EmptyState
             title="No little details here yet."
-            detail="Try another month or clear your filters. You can also add a new preview entry."
+            detail="Try another month or clear your filters. You can also add a new entry."
             action="Clear search and filters"
             onAction={clear}
           />

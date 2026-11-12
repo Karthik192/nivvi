@@ -7,7 +7,7 @@ import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Screen } from '../../components/ui/Screen';
 import { tokens, useTheme } from '../../design/theme';
-import { usePreviewStore } from '../preview/store';
+import { useAppStore } from '../../data/store';
 
 const slides = [
   {
@@ -34,7 +34,7 @@ const slides = [
     eyebrow: 'MAKE SPACE FOR WHAT MATTERS',
     title: 'A little today.\nA little further.',
     detail:
-      'Discover sample budgets and goals, and imagine the next small step towards something that matters to you.',
+      'Discover budgets and goals, and imagine the next small step towards something that matters to you.',
     note: 'Start with curiosity. Grow from there.',
     surface: 'lavender',
     ink: 'onLavender',
@@ -44,7 +44,7 @@ const slides = [
 
 export function OnboardingScreen() {
   const { colours } = useTheme();
-  const finishOnboarding = usePreviewStore((state) => state.finishOnboarding);
+  const finishOnboarding = useAppStore((state) => state.finishOnboarding);
   const [index, setIndex] = useState(0);
   const slide = slides[index] ?? slides[0];
   const finish = () => {
@@ -99,14 +99,13 @@ export function OnboardingScreen() {
       </View>
       <View style={styles.copy}>
         <Button
-          label={index === slides.length - 1 ? 'Explore the preview' : 'Continue'}
+          label={index === slides.length - 1 ? 'Get started' : 'Continue'}
           onPress={() => (index === slides.length - 1 ? finish() : move(index + 1))}
         />
         {index > 0 && <Button label="Back" variant="secondary" onPress={() => move(index - 1)} />}
       </View>
       <AppText variant="caption" colour="muted" style={styles.center}>
-        Design preview. No real account is created. Sample screens only; no bank connection or real
-        money movement.
+        Manual tracking only. No bank connection or money movement.
       </AppText>
     </Screen>
   );

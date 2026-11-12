@@ -1,4 +1,4 @@
-import { useEffect, type PropsWithChildren, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type PropsWithChildren, type ReactNode } from 'react';
 import { ActivityIndicator, Modal, Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
@@ -9,7 +9,9 @@ import { Screen } from '../../components/ui/Screen';
 import { Mascot } from '../../components/brand/Mascot';
 import { tokens, useTheme } from '../../design/theme';
 import { useMotion } from '../../design/useMotion';
-import { usePreviewStore } from './store';
+import { useAppStore } from '../../data/store';
+import { ReloadAccount } from '../../data/Provider';
+import { isPreview, session } from '../../data/runtime';
 import { monthName, progressPercent, shiftMonth } from './finance';
 
 export function Row({ children }: PropsWithChildren) {
@@ -25,8 +27,9 @@ export function PageHeader({
   back?: boolean;
 }) {
   const { colours } = useTheme();
-  const notice = usePreviewStore((state) => state.notice);
-  const profile = usePreviewStore((state) => state.profile);
+  const notice = useAppStore((state) => state.notice);
+  const profile = useAppStore((state) => state.profile);
+  const expired = session((s) => s.expired);
   return (
     <>
       <View style={styles.header}>
@@ -35,7 +38,7 @@ export function PageHeader({
             nivvi.
           </AppText>
           <AppText variant="caption" colour="muted">
-            Design preview · session only
+            {isPreview ? 'Design preview · session only' : 'Your Nivvi account'}
           </AppText>
         </View>
         {back ? (
@@ -69,7 +72,7 @@ export function PageHeader({
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Dismiss message"
-            onPress={() => usePreviewStore.getState().dismissNotice()}
+            onPress={() => useAppStore.getState().dismissNotice()}
             style={{
               minWidth: 48,
               minHeight: 48,
@@ -84,6 +87,13 @@ export function PageHeader({
           </Pressable>
         </View>
       ) : null}
+      {!isPreview && expired && (
+        <Button
+          label="Sign in again to save your draft"
+          variant="secondary"
+          onPress={() => router.push('/sign-in')}
+        />
+      )}
     </>
   );
 }
@@ -242,10 +252,13 @@ export function Confirmation({
   visible: boolean;
   title: string;
   detail: string;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
   onCancel: () => void;
   confirmLabel?: string;
 }) {
+  const [busy, setBusy] = useState(false);
+  const locked = useRef(false);
+  const [failure, setFailure] = useState('');
   const { colours } = useTheme();
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={onCancel}>
@@ -258,8 +271,26 @@ export function Confirmation({
             {title}
           </AppText>
           <AppText>{detail}</AppText>
-          <Button label={confirmLabel} variant="destructive" onPress={onConfirm} />
-          <Button label="Cancel" variant="secondary" onPress={onCancel} />
+          <ErrorText message={failure} />
+          <Button
+            label={confirmLabel}
+            variant="destructive"
+            busy={busy}
+            onPress={async () => {
+              if (locked.current) return;
+              locked.current = true;
+              setBusy(true);
+              try {
+                await onConfirm();
+              } catch (error) {
+                setFailure((error as Error).message);
+              } finally {
+                locked.current = false;
+                setBusy(false);
+              }
+            }}
+          />
+          <Button label="Cancel" variant="secondary" disabled={busy} onPress={onCancel} />
         </View>
       </View>
     </Modal>
@@ -291,9 +322,17 @@ export function MonthPicker({
   );
 }
 export function Resource({ children }: PropsWithChildren) {
-  const scenario = usePreviewStore((state) => state.scenario);
+  const scenario = useAppStore((state) => state.scenario);
   const { reduced } = useMotion();
   const { colours } = useTheme();
+  if (!isPreview && scenario === 'loading')
+    return (
+      <Card>
+        <ActivityIndicator color={colours.primary} />
+        <AppText>Loading your account...</AppText>
+      </Card>
+    );
+  if (!isPreview && scenario === 'error') return <ReloadAccount />;
   if (scenario === 'loading')
     return (
       <Card>
@@ -302,7 +341,7 @@ export function Resource({ children }: PropsWithChildren) {
         <AppText colour="muted">Preview of the loading state.</AppText>
         <Button
           label="Finish loading preview"
-          onPress={() => usePreviewStore.getState().setScenario('ready')}
+          onPress={() => useAppStore.getState().setScenario('ready')}
         />
       </Card>
     );
@@ -311,7 +350,7 @@ export function Resource({ children }: PropsWithChildren) {
       <Card>
         <AppText variant="heading">A little pause.</AppText>
         <ErrorText message="We couldn’t load this view. Your preview entries are still here." />
-        <Button label="Try again" onPress={() => usePreviewStore.getState().setScenario('ready')} />
+        <Button label="Try again" onPress={() => useAppStore.getState().setScenario('ready')} />
       </Card>
     );
   return children;

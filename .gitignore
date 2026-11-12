@@ -9,8 +9,10 @@ coverage/
 .local/
 apps/mobile/android/
 apps/mobile/ios/
+apps/mobile/modules/**/android/build/
 apps/mobile/expo-env.d.ts
 *.jks
 *.keystore
 .idea/
 tmp/pdfs/
+apps/backend/src/generated/

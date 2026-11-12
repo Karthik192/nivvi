@@ -16,9 +16,13 @@ describe('planning drafts', () => {
     expect(budgetDraft('2026-11', '100', { a: '40.01', b: '59.99' }).errors).toEqual({});
     expect(budgetDraft('2026-11', '100', { a: '40.01', b: '60' }).errors.monthly).toBeTruthy();
   });
-  it('reports editable fields for invalid and zero amounts', () => {
+  it('reports invalid fields while allowing a zero budget limit', () => {
     const { errors } = budgetDraft('2026-11', '', { a: '0', b: '1.001' });
-    expect(Object.keys(errors).sort()).toEqual(['a', 'b', 'monthly']);
+    expect(Object.keys(errors).sort()).toEqual(['b', 'monthly']);
+    expect(budgetDraft('2026-11', '0', { a: '0' })).toMatchObject({
+      errors: {},
+      budget: { limitPaise: 0, categoryLimits: { a: 0 } },
+    });
   });
   it('accepts an optional deadline and validates calendar dates, names, and amounts', () => {
     expect(goalErrors('Rainy day', '1000.01', '')).toEqual({});

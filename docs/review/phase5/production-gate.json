@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "routes": [
+    "index",
+    "home",
+    "transactions",
+    "insights",
+    "goals",
+    "transaction"
+  ],
+  "previewContentRendered": false,
+  "checkedAt": "2026-11-12T03:12:45.991Z",
+  "limitation": "Static HTML check only. Routes render the secure-session bootstrap until client startup; this does not verify an Android release build or production API."
+}

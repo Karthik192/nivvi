@@ -1,3 +1,5 @@
+import { isPreview } from '../../data/runtime';
+import { OnlineInsights } from '../../data/OnlineScreens';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
@@ -11,11 +13,14 @@ import { useMotion } from '../../design/useMotion';
 import { Page, Row, MonthPicker, Meter, Section, Resource, EmptyState } from '../preview/ui';
 import { currentMonth, money, totals, shiftMonth, monthName, today } from '../preview/finance';
 import { spendingPeriods, categoryBreakdown, merchantBreakdown } from '../preview/analytics';
-import { usePreviewStore } from '../preview/store';
+import { useAppStore } from '../../data/store';
 
 export function InsightsScreen() {
-  const transactions = usePreviewStore((state) => state.transactions);
-  const categories = usePreviewStore((state) => state.categories);
+  return isPreview ? <PreviewInsightsScreen /> : <OnlineInsights />;
+}
+function PreviewInsightsScreen() {
+  const transactions = useAppStore((state) => state.transactions);
+  const categories = useAppStore((state) => state.categories);
   const { colours } = useTheme();
   const { reduced } = useMotion();
   const [month, setMonth] = useState(currentMonth);

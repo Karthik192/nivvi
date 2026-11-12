@@ -36,6 +36,7 @@ export function TransactionRow({
           <AppText variant="label">{title}</AppText>
           <AppText variant="caption" colour="muted">
             {category?.name ?? 'Category'} · {record.paymentMethod}
+            {record.syncStatus === 'pending' ? ' · On this device, waiting to sync' : record.syncStatus === 'conflict' ? ' · Needs review' : ''}
           </AppText>
         </View>
       </View>

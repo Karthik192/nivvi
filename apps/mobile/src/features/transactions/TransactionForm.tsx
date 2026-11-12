@@ -1,3 +1,4 @@
+import { isPreview, uuid } from '../../data/runtime';
 import { useRef, useState, type ComponentRef } from 'react';
 import { AccessibilityInfo, Keyboard, Pressable, View, type TextInput } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -18,7 +19,7 @@ import {
   validDate,
 } from '../preview/finance';
 import { paymentMethods, type TransactionDraft, type TransactionType } from '../preview/model';
-import { usePreviewStore } from '../preview/store';
+import { useAppStore } from '../../data/store';
 import { routeValue } from '../preview/params';
 import { useUnsaved } from '../preview/useUnsaved';
 import { useTheme } from '../../design/theme';
@@ -27,8 +28,8 @@ export function TransactionForm() {
   const params = useLocalSearchParams();
   const { colours } = useTheme();
   const editingId = routeValue(params.id);
-  const transactions = usePreviewStore((state) => state.transactions);
-  const categories = usePreviewStore((state) => state.categories);
+  const transactions = useAppStore((state) => state.transactions);
+  const categories = useAppStore((state) => state.categories);
   const existing = transactions.find((record) => record.id === editingId);
   const refundParent = transactions.find(
     (record) => record.id === routeValue(params.originalExpenseId) && record.type === 'expense',
@@ -36,12 +37,21 @@ export function TransactionForm() {
   const initialType: TransactionType =
     existing?.type ??
     (params.type === 'income' ? 'income' : params.type === 'refund' ? 'refund' : 'expense');
+  const widgetCategoryName = routeValue(params.categoryName)?.trim().toLocaleLowerCase();
+  const version = useRef(existing?.version);
   const [initial] = useState<TransactionDraft>(() => ({
-    amount: existing ? amountInput(existing.amountPaise) : '',
+    ...(!isPreview && !editingId ? { clientId: uuid() } : {}),
+    amount: existing ? amountInput(existing.amountPaise) : routeValue(params.amount) ?? '',
     type: initialType,
     categoryId:
       existing?.categoryId ??
       refundParent?.categoryId ??
+      categories.find(
+        (category) =>
+          !category.archived &&
+          category.kind === (initialType === 'income' ? 'income' : 'expense') &&
+          category.name.toLocaleLowerCase() === widgetCategoryName,
+      )?.id ??
       categories.find(
         (category) =>
           !category.archived && category.kind === (initialType === 'income' ? 'income' : 'expense'),
@@ -81,7 +91,7 @@ export function TransactionForm() {
     }));
     setErrors({});
   };
-  const save = () => {
+  const save = async () => {
     if (locked.current) return;
     const validated = validateTransaction(draft, categories, transactions, editingId);
     setErrors(validated.errors);
@@ -97,7 +107,7 @@ export function TransactionForm() {
     setSaving(true);
     Keyboard.dismiss();
     try {
-      const id = usePreviewStore.getState().saveTransaction(draft, editingId);
+      const id = await useAppStore.getState().saveTransaction(draft, editingId, version.current);
       unsaved.allowNavigation();
       router.replace({ pathname: '/transaction-detail', params: { id } });
     } catch (cause) {
@@ -152,8 +162,12 @@ export function TransactionForm() {
               saving
                 ? 'Adding to preview…'
                 : editingId
-                  ? 'Update preview entry'
-                  : `Add ${draft.type} to preview`
+                  ? isPreview
+                    ? 'Update preview entry'
+                    : 'Update entry'
+                  : isPreview
+                    ? `Add ${draft.type} to preview`
+                    : `Save ${draft.type}`
             }
             busy={saving}
             onPress={save}
@@ -179,7 +193,7 @@ export function TransactionForm() {
           value={draft.amount}
           onChangeText={(value) => change('amount', value)}
           keyboardType="decimal-pad"
-          maxLength={12}
+          maxLength={13}
           error={errors.amount}
           autoFocus={!editingId}
         />
@@ -335,7 +349,9 @@ export function TransactionForm() {
         </Card>
       )}
       <AppText variant="caption" colour="muted">
-        This updates the session preview only. Nothing is stored on your device or synced.
+        {isPreview
+          ? 'This updates the session preview only. Nothing is stored on your device or synced.'
+          : 'Your entry is saved to your account when you confirm. An internet connection is required.'}
       </AppText>
       {saving && <Mascot state="saving" />}
       {unsaved.dialog}

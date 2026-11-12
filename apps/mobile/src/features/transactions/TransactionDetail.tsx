@@ -1,3 +1,4 @@
+import { isPreview } from '../../data/runtime';
 import { useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { AppText } from '../../components/ui/AppText';
@@ -6,24 +7,26 @@ import { Button } from '../../components/ui/Button';
 import { Mascot } from '../../components/brand/Mascot';
 import { CategoryIcon } from '../preview/CategoryIcon';
 import { Page, Section, EmptyState, Confirmation, ErrorText } from '../preview/ui';
-import { usePreviewStore } from '../preview/store';
+import { useAppStore } from '../../data/store';
 import { dateLabel, money, refundRemaining } from '../preview/finance';
 import { routeValue } from '../preview/params';
+import { keepLocalChanges, resolveServerVersion, runSync, hydrateOffline } from '../../data/offline/sync';
 
 export function TransactionDetail() {
   const params = useLocalSearchParams();
   const id = routeValue(params.id);
-  const transactions = usePreviewStore((state) => state.transactions);
-  const categories = usePreviewStore((state) => state.categories);
+  const transactions = useAppStore((state) => state.transactions);
+  const categories = useAppStore((state) => state.categories);
   const record = transactions.find((item) => item.id === id);
   const [remove, setRemove] = useState(false);
   const [error, setError] = useState('');
+  const owner = useAppStore((state) => state.profile?.id);
   if (!record)
     return (
       <Page title="Entry unavailable" back>
         <EmptyState
           title="This entry is no longer here."
-          detail="Check your history or add a new preview entry."
+          detail="Check your history or add a new entry."
           action="Open history"
           onAction={() => router.replace('/transactions')}
         />
@@ -49,9 +52,23 @@ export function TransactionDetail() {
         {record.description && <AppText>{record.description}</AppText>}
         <Mascot state="saved" />
         <AppText variant="caption" colour="muted">
-          Preview entry · not stored or synced
+          {isPreview ? 'Preview entry · not stored or synced' : record.syncStatus === 'conflict' ? 'Your device version is saved. Review the account version before syncing.' : record.syncStatus === 'pending' ? 'Saved on this device · waiting to sync.' : 'Synced to your account.'}
         </AppText>
       </Card>
+      {record.syncStatus === 'conflict' && !isPreview && (
+        <Section title="Review this change">
+          <AppText>Your saved version is kept on this device. Choose which version to keep.</AppText>
+          <Button label={record.remoteConflict && !record.remoteConflict.deletedAt ? 'Use account version' : 'Discard this device copy'} variant="secondary" onPress={async()=>{
+            try { if(!owner) throw new Error('Account unavailable.'); await resolveServerVersion(owner,record.id); const cache=await hydrateOffline(owner); useAppStore.setState({transactions:cache.transactions,categories:cache.categories}); setError('Account version restored.'); }
+            catch(cause){setError((cause as Error).message);}
+          }}/>
+          {record.remoteConflict && !record.remoteConflict.deletedAt && typeof record.remoteConflict.version === 'number' && <Button label="Keep my changes" onPress={async()=>{
+            try { if(!owner) throw new Error('Account unavailable.'); await keepLocalChanges(owner,record.id); const cache=await hydrateOffline(owner); useAppStore.setState({transactions:cache.transactions,categories:cache.categories}); await runSync(owner); const synced=await hydrateOffline(owner); useAppStore.setState({transactions:synced.transactions,categories:synced.categories}); setError(''); }
+            catch(cause){setError((cause as Error).message);}
+          }}/>}
+          {!!record.remoteConflict?.deletedAt && <AppText>The account entry was deleted. To retain these details, create a new entry after reviewing them.</AppText>}
+        </Section>
+      )}
       <Button
         label="Edit entry"
         onPress={() => router.push({ pathname: '/transaction', params: { id: record.id } })}
@@ -115,13 +132,17 @@ export function TransactionDetail() {
       <Confirmation
         visible={remove}
         title="Remove this entry?"
-        detail="This removes the entry from your session preview. No real financial record is affected."
+        detail={
+          isPreview
+            ? 'This removes the sample entry.'
+            : 'This deletes the entry from your account. This action cannot be undone here.'
+        }
         confirmLabel="Delete entry"
         onCancel={() => setRemove(false)}
-        onConfirm={() => {
+        onConfirm={async () => {
           setRemove(false);
           try {
-            usePreviewStore.getState().deleteTransaction(record.id);
+            await await useAppStore.getState().deleteTransaction(record.id);
             router.replace('/transactions');
           } catch (cause) {
             setError((cause as Error).message);

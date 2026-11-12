@@ -33,13 +33,19 @@ function Read-Ui {
 }
 function Ui-Node {
     param([xml]$Tree,[string]$Label)
-    $nodes = @($Tree.SelectNodes('//node') | Where-Object { $text=$_.GetAttribute('text'); $description=$_.GetAttribute('content-desc'); $_.GetAttribute('class') -ne 'android.widget.EditText' -and ($text -eq $Label -or $description -eq $Label -or $description.StartsWith("$Label,") -or $description.StartsWith("$Label ")) })
+    $nodes = @($Tree.SelectNodes('//node') | Where-Object { $text=$_.GetAttribute('text'); $description=$_.GetAttribute('content-desc'); (Valid-UiBounds $_) -and $_.GetAttribute('class') -ne 'android.widget.EditText' -and ($text -eq $Label -or $description -eq $Label -or $description.StartsWith("$Label,") -or $description.StartsWith("$Label ")) })
     $clickable = $nodes | Where-Object { $_.GetAttribute('clickable') -eq 'true' } | Select-Object -First 1
     if ($clickable) { return $clickable }
     return $nodes | Select-Object -First 1
 }
+function Valid-UiBounds {
+    param($Node)
+    $coordinates=@([regex]::Matches($Node.GetAttribute('bounds'),'\d+') | ForEach-Object { [int]$_.Value })
+    return $coordinates.Count -eq 4 -and $coordinates[2] -gt $coordinates[0] -and $coordinates[3] -gt $coordinates[1]
+}
 function Tap-Node {
     param($Node)
+    if(-not(Valid-UiBounds $Node)){throw 'Refusing to tap a clipped node with invalid bounds.'}
     $b=[regex]::Matches($Node.GetAttribute('bounds'),'\d+') | ForEach-Object { [int]$_.Value }
     Adb-Run @('shell','input','tap',"$([int](($b[0]+$b[2])/2))","$([int](($b[1]+$b[3])/2))") | Out-Null
     Start-Sleep -Milliseconds 300
@@ -77,7 +83,7 @@ function Fill-Field {
     param([string]$Label,[string]$Value,[int]$Scrolls=0)
     Hide-Keyboard
     for($i=0;$i -lt [Math]::Max(5,$Scrolls+1);$i++) {
-        $tree=Read-Ui; $node=$tree.SelectNodes('//node') | Where-Object { $_.GetAttribute('class') -eq 'android.widget.EditText' -and $_.GetAttribute('content-desc').StartsWith($Label) } | Select-Object -First 1
+        $tree=Read-Ui; $node=$tree.SelectNodes('//node') | Where-Object { (Valid-UiBounds $_) -and $_.GetAttribute('class') -eq 'android.widget.EditText' -and $_.GetAttribute('content-desc').StartsWith($Label) } | Select-Object -First 1
         if($node){
             Tap-Node $node
             $focusTree=Read-Ui

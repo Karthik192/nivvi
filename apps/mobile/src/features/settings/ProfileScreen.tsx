@@ -1,3 +1,4 @@
+import { isPreview, api } from '../../data/runtime';
 import { useRef, useState, type ComponentRef } from 'react';
 import { router, type Href } from 'expo-router';
 import { AccessibilityInfo, type TextInput } from 'react-native';
@@ -7,7 +8,7 @@ import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { Mascot } from '../../components/brand/Mascot';
 import type { Profile } from '../preview/model';
-import { usePreviewStore } from '../preview/store';
+import { useAppStore } from '../../data/store';
 import { Confirmation, EmptyState, Page, Section } from '../preview/ui';
 import { useUnsaved } from '../preview/useUnsaved';
 
@@ -20,16 +21,24 @@ const links = [
 ] as const satisfies readonly { label: string; path: Href }[];
 
 export function ProfileScreen() {
-  const profile = usePreviewStore((state) => state.profile);
+  const profile = useAppStore((state) => state.profile);
   return (
-    <Page title="A little space for you." subtitle="Your preview profile" back>
+    <Page
+      title="A little space for you."
+      subtitle={isPreview ? 'Your preview profile' : 'Your profile'}
+      back
+    >
       {profile ? (
         <ProfileForm profile={profile} />
       ) : (
         <EmptyState
-          title="No preview profile yet"
-          detail="Enter the design preview to try editing a temporary profile. No real account is created."
-          action="Enter preview"
+          title={isPreview ? 'No preview profile yet' : 'Profile unavailable'}
+          detail={
+            isPreview
+              ? 'Enter the design preview to try editing a temporary profile. No real account is created.'
+              : 'Sign in again to load your account profile.'
+          }
+          action={isPreview ? 'Enter preview' : 'Sign in again'}
           onAction={() => router.replace('/sign-in')}
         />
       )}
@@ -38,8 +47,9 @@ export function ProfileScreen() {
 }
 
 function ProfileForm({ profile }: { profile: Profile }) {
-  const updateProfile = usePreviewStore((state) => state.updateProfile);
-  const signOut = usePreviewStore((state) => state.signOut);
+  const version = useRef(profile.version);
+  const updateProfile = useAppStore((state) => state.updateProfile);
+  const signOut = useAppStore((state) => state.signOut);
   const [name, setName] = useState(profile.name);
   const [error, setError] = useState('');
   const [signingOut, setSigningOut] = useState(false);
@@ -47,15 +57,15 @@ function ProfileForm({ profile }: { profile: Profile }) {
   const nameRef = useRef<ComponentRef<typeof TextInput>>(null);
   const dirty = name !== profile.name;
   const unsaved = useUnsaved(dirty);
-  const save = () => {
+  const save = async () => {
     try {
-      updateProfile(name);
+      await updateProfile(name, version.current);
+      version.current = useAppStore.getState().profile?.version;
       setName(name.trim());
       setError('');
-      AccessibilityInfo.announceForAccessibility('Profile name updated for this preview session.');
+      AccessibilityInfo.announceForAccessibility('Profile name updated.');
     } catch (caught) {
-      const message =
-        caught instanceof Error ? caught.message : 'Check your preview name and try again.';
+      const message = caught instanceof Error ? caught.message : 'Check your name and try again.';
       setError(message);
       nameRef.current?.focus();
       AccessibilityInfo.announceForAccessibility(message);
@@ -69,11 +79,13 @@ function ProfileForm({ profile }: { profile: Profile }) {
           Your name, your pace.
         </AppText>
         <AppText colour="muted">
-          Design preview. No real account is created. These details stay in memory for this session.
+          {isPreview
+            ? 'Design preview. These details stay in memory.'
+            : 'Your profile is stored with your Nivvi account.'}
         </AppText>
         <Input
           ref={nameRef}
-          label="Preview name"
+          label="Your name"
           hint="Use a name between 1 and 60 characters."
           value={name}
           onChangeText={(value) => {
@@ -85,47 +97,73 @@ function ProfileForm({ profile }: { profile: Profile }) {
           onSubmitEditing={save}
         />
         <Input
-          label="Demo email address"
+          label="Email address"
           value={profile.email}
           editable={false}
-          hint="Read-only preview detail. No email verification or account service is connected."
+          hint="Email address changes are not available here."
         />
-        <Button label="Save preview name" onPress={save} />
+        <Button label="Save name" onPress={save} />
       </Card>
-      <Section title="Make this space yours">
-        {links.map((link) => (
+      {!isPreview && (
+        <Card>
+          <AppText variant="heading">Account email</AppText>
           <Button
-            key={link.path}
-            label={link.label}
+            label="Resend verification instructions"
             variant="secondary"
-            onPress={() => (dirty ? setDestination(link.path) : router.push(link.path))}
+            onPress={async () => {
+              try {
+                await api.request('/auth/email/resend', { method: 'POST', body: '{}' });
+                setError('Verification instructions requested.');
+              } catch (error) {
+                setError((error as Error).message);
+              }
+            }}
           />
-        ))}
+          <Button
+            label="I have a verification token"
+            variant="quiet"
+            onPress={() => router.push({ pathname: '/account-action', params: { mode: 'verify' } })}
+          />
+        </Card>
+      )}
+      <Section title="Make this space yours">
+        {links
+          .filter((link) => isPreview || link.path !== '/preview-tools')
+          .map((link) => (
+            <Button
+              key={link.path}
+              label={link.label}
+              variant="secondary"
+              onPress={() => (dirty ? setDestination(link.path) : router.push(link.path))}
+            />
+          ))}
       </Section>
       <Card>
         <AppText variant="heading" accessibilityRole="header">
-          Ready to leave the preview?
+          Ready to take a break?
         </AppText>
         <AppText colour="muted">
-          Signing out clears your preview profile and resets sample entries, categories, budgets and
-          goals. Nothing was stored or synced.
+          {isPreview
+            ? 'Signing out resets the sample preview.'
+            : 'Signing out removes this device?s session. Saved records remain in your account.'}
         </AppText>
-        <Button
-          label="Sign out of preview"
-          variant="destructive"
-          onPress={() => setSigningOut(true)}
-        />
+        <Button label="Sign out" variant="destructive" onPress={() => setSigningOut(true)} />
       </Card>
       <Confirmation
         visible={signingOut}
-        title="Leave and reset this preview?"
-        detail="Your profile, unsaved name changes and edits to sample data will be discarded. The starting sample entries, categories, budgets and goals will be restored. This does not sign out of a real account."
-        confirmLabel="Sign out and reset preview"
+        title="Sign out of Nivvi?"
+        detail="Unsaved changes on this screen will be discarded. Saved account records will remain."
+        confirmLabel="Sign out"
         onCancel={() => setSigningOut(false)}
-        onConfirm={() => {
+        onConfirm={async () => {
           unsaved.allowNavigation();
-          signOut();
-          router.replace('/');
+          try {
+            await signOut();
+            router.replace('/');
+          } catch (error) {
+            setError((error as Error).message);
+            setSigningOut(false);
+          }
         }}
       />
       <Confirmation
@@ -134,7 +172,7 @@ function ProfileForm({ profile }: { profile: Profile }) {
         detail="Your unsaved preview name will be discarded. Your other sample data stays as it is."
         confirmLabel="Discard name changes"
         onCancel={() => setDestination(null)}
-        onConfirm={() => {
+        onConfirm={async () => {
           const next = destination;
           setDestination(null);
           setName(profile.name);

@@ -1,4 +1,4 @@
-import { parseAmount, today, validDate } from '../preview/finance';
+import { parseAmount, parseLimit, today, validDate } from '../preview/finance';
 import type { Budget } from '../preview/model';
 
 export type FieldErrors = Record<string, string>;
@@ -6,7 +6,7 @@ export function budgetDraft(month: string, monthly: string, categories: Record<s
   const errors: FieldErrors = {};
   let limitPaise = 0;
   try {
-    limitPaise = parseAmount(monthly);
+    limitPaise = parseLimit(monthly);
   } catch (error) {
     errors.monthly = (error as Error).message;
   }
@@ -14,13 +14,13 @@ export function budgetDraft(month: string, monthly: string, categories: Record<s
   for (const [id, amount] of Object.entries(categories)) {
     if (!amount.trim()) continue;
     try {
-      categoryLimits[id] = parseAmount(amount);
+      categoryLimits[id] = parseLimit(amount);
     } catch (error) {
       errors[id] = (error as Error).message;
     }
   }
   if (
-    limitPaise &&
+    !errors.monthly &&
     Object.values(categoryLimits).reduce((sum, value) => sum + value, 0) > limitPaise
   ) {
     errors.monthly =
