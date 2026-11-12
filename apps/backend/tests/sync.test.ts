@@ -21,7 +21,7 @@ test('sync bootstrap paginates a fixed snapshot and pull is authenticated and ac
   assert.equal(first.body.data.categories.length, account.categories.length);
   assert.equal(first.body.data.hasMore, true);
   const watermark = first.body.data.watermark;
-  const afterWatermarkId = '00000000-0000-4000-8000-000000000001';
+  const afterWatermarkId = operationId();
   await create(afterWatermarkId).expect(201);
   await api.get(root + '/sync/bootstrap').expect(401);
   const second = await api.get(root + '/sync/bootstrap').query({ limit: 1, cursor: first.body.data.cursor }).auth(account.token, { type: 'bearer' }).expect(200);

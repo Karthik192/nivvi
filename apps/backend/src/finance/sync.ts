@@ -1,7 +1,6 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { Router } from 'express';
 import { z } from '@nivvi/contracts';
-import { serialize } from '../core/database.js';
 import { ApiError } from '../core/errors.js';
 import { endpoint, principal, send } from '../core/http.js';
 import type { Deps } from '../core/types.js';
