@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 import * as contracts from '@nivvi/contracts';
 import * as Network from 'expo-network';
 import { ApiError } from '../client';
-import { api, uuid, type RecordDTO } from '../runtime';
+import { api, apiIsReachable, uuid, type RecordDTO } from '../runtime';
 import * as map from '../mapping';
 import {
   acknowledgeOutbox,
@@ -29,7 +29,7 @@ export async function networkAvailable() {
   // A local API (including an Android USB reverse tunnel) can be reachable
   // even when Android reports that general internet access is unavailable.
   // Let the actual API request determine reachability.
-  return state.isConnected === true;
+  return state.isConnected === true || apiIsReachable();
 }
 
 async function requestJson<T>(path: string) {

@@ -11,6 +11,17 @@ const configured = Constants.expoConfig?.extra?.apiBaseUrl as string | undefined
 export const apiUrl = (configured || (__DEV__ ? 'http://127.0.0.1:3000' : ''))
   .replace(/\/$/, '')
   .replace(/\/api\/v1$/i, '');
+export async function apiIsReachable() {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 2500);
+  try {
+    return (await fetch(`${apiUrl}/health/ready`, { signal: controller.signal })).ok;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timer);
+  }
+}
 const environmentKey = Constants.expoConfig?.extra?.environment ?? 'development';
 const key = `nivvi.session.v2.${environmentKey}`;
 const legacyRefreshKey = `nivvi.refresh.${environmentKey}`;

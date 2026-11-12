@@ -3,6 +3,7 @@ import { AppState, View } from 'react-native';
 import { QueryClientProvider, useQuery, focusManager } from '@tanstack/react-query';
 import {
   api,
+  apiIsReachable,
   isPreview,
   queryClient,
   session,
@@ -31,15 +32,24 @@ export async function restoreSession() {
     // cache and background sync are restored; screen queries show their own
     // loading states for data that has not arrived yet.
     liveStore.setState({ profile, onboarded: true, scenario: 'ready' });
+    session.setState({ expired: false, offline: false, error: '' });
     if (Platform.OS !== 'web') {
-      await offlineOwner.set(user.id);
-      await storeOfflineProfile(user.id, user);
-      await scheduleOfflineSync();
-      await runSync(user.id);
-      const cached = await hydrateOffline(user.id);
-      liveStore.setState({ ...cached, scenario: 'ready' });
+      try {
+        await offlineOwner.set(user.id);
+        await storeOfflineProfile(user.id, user);
+        await scheduleOfflineSync();
+      } catch {
+        // Online authentication and account APIs remain usable if this device's
+        // encrypted cache is unavailable.
+      }
+      void runSync(user.id)
+        .then(async () => {
+          const cached = await hydrateOffline(user.id);
+          if (liveStore.getState().profile?.id === user.id)
+            liveStore.setState({ ...cached, scenario: 'ready' });
+        })
+        .catch(() => {});
     }
-    session.setState({ expired: false, offline: false });
   } catch (error) {
     if (Platform.OS !== 'web') {
       try {
@@ -81,21 +91,25 @@ export function DataProvider({ children }: PropsWithChildren) {
     const unsubscribeStore = liveStore.subscribe(publishWidget);
     const unsubscribeSession = session.subscribe(publishWidget);
     publishWidget();
-    const networkListener = Network.addNetworkStateListener((state) => {
+    const handleNetworkState = (state: Network.NetworkState) => {
       const owner = liveStore.getState().profile?.id;
-      if (!state.isConnected) {
-        session.setState({ offline: true });
-        return;
-      }
-      if (state.isConnected && owner && Platform.OS !== 'web')
-        void runSync(owner).then(async () => {
-          const cached = await hydrateOffline(owner);
-          if (liveStore.getState().profile?.id === owner) {
-            liveStore.setState(cached);
-            session.setState({ offline: false });
-          }
-        }).catch(() => {});
-    });
+      void (async () => {
+        // Android may report no internet while the development API is reachable
+        // over USB reverse or a local network. Probe the API before declaring offline.
+        if (!state.isConnected && !(await apiIsReachable())) {
+          session.setState({ offline: true });
+          return;
+        }
+        session.setState({ offline: false });
+        if (owner && Platform.OS !== 'web')
+          void runSync(owner).then(async () => {
+            const cached = await hydrateOffline(owner);
+            if (liveStore.getState().profile?.id === owner) liveStore.setState(cached);
+          }).catch(() => {});
+      })();
+    };
+    const networkListener = Network.addNetworkStateListener(handleNetworkState);
+    void Network.getNetworkStateAsync().then(handleNetworkState).catch(() => {});
     const listener = AppState.addEventListener('change', (value) => {
       focusManager.setFocused(value === 'active');
       const owner = liveStore.getState().profile?.id;
@@ -120,15 +134,19 @@ export function DataProvider({ children }: PropsWithChildren) {
 }
 function Metadata() {
   const owner = liveStore((s) => s.profile?.id);
-  const offline = session((s) => s.offline);
   const query = useQuery({
     queryKey: ['account', owner, 'metadata'],
-    enabled: !isPreview && !offline && !!owner,
+    enabled: !isPreview && !!owner,
     queryFn: async () => {
       if (Platform.OS !== 'web') {
-        await runSync(owner!);
-        const cached = await hydrateOffline(owner!);
-        if (liveStore.getState().profile?.id === owner) liveStore.setState(cached);
+        try {
+          await runSync(owner!);
+          const cached = await hydrateOffline(owner!);
+          if (liveStore.getState().profile?.id === owner) liveStore.setState(cached);
+        } catch {
+          // A damaged/unavailable local cache must not block online account
+          // data. The server requests below remain authoritative.
+        }
       }
       const [categories, budgets, goals] = await Promise.all([
         api.request<RecordDTO[]>('/categories?includeArchived=true'),
@@ -148,7 +166,7 @@ function Metadata() {
     },
   });
   useEffect(() => {
-    if (query.data && liveStore.getState().profile?.id === owner)
+    if (query.data && liveStore.getState().profile?.id === owner) {
       liveStore.setState({
         ...query.data,
         goals: query.data.goals.map((g) => ({
@@ -157,10 +175,20 @@ function Metadata() {
         })),
         scenario: 'ready',
       });
+      session.setState({ offline: false });
+    }
   }, [query.data, owner]);
   useEffect(() => {
     if (query.error && liveStore.getState().profile?.id === owner) {
-      if (!query.data) liveStore.setState({ scenario: 'error' });
+      if (session.getState().offline) {
+        liveStore.setState({ scenario: 'ready' });
+        return;
+      }
+      if (!query.data)
+        liveStore.setState({
+          scenario: 'error',
+          notice: query.error instanceof Error ? query.error.message : 'Account data could not be loaded.',
+        });
       else
         liveStore.setState({
           notice: 'Could not refresh account data. Previously loaded values are shown.',
@@ -170,13 +198,16 @@ function Metadata() {
   return null;
 }
 export function ReloadAccount() {
+  const detail = liveStore((state) => state.notice);
   return (
     <View style={{ gap: 16 }}>
-      <AppText>Could not load your account. Check your connection and try again.</AppText>
+      <AppText colour="danger">
+        {detail || 'Could not load your account. Check your connection and try again.'}
+      </AppText>
       <Button
         label="Try again"
         onPress={() => {
-          liveStore.setState({ scenario: 'loading' });
+          liveStore.setState({ scenario: 'loading', notice: '' });
           void queryClient.invalidateQueries({ queryKey: ['account'] });
         }}
       />
