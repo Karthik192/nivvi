@@ -9,6 +9,25 @@ import { authenticate, authRouter, profileRouter } from './auth/index.js';
 import { financeRouter } from './finance/index.js';
 import { analyticsRouter } from './analytics/index.js';
 import { makeOpenApi } from './openapi.js';
+
+function databaseErrorDetails(error: unknown) {
+  const details: Array<{ name: string; code?: string | number }> = [];
+  const seen = new Set<object>();
+  let current: unknown = error;
+  while (current && typeof current === 'object' && details.length < 4 && !seen.has(current)) {
+    seen.add(current);
+    const value = current as { name?: unknown; code?: unknown; cause?: unknown };
+    details.push({
+      name: typeof value.name === 'string' ? value.name : 'Error',
+      ...(typeof value.code === 'string' || typeof value.code === 'number'
+        ? { code: value.code }
+        : {}),
+    });
+    current = value.cause;
+  }
+  return details;
+}
+
 export function createApp(deps: Deps) {
   const app = express();
   app.disable('x-powered-by');
@@ -49,7 +68,12 @@ export function createApp(deps: Deps) {
       try {
         await deps.db.$queryRaw`SELECT 1`;
         res.json({ data: { status: 'ready' } });
-      } catch {
+      } catch (error) {
+        deps.logger.warn({
+          event: 'database_readiness_failed',
+          requestId: req.requestId,
+          databaseError: databaseErrorDetails(error),
+        });
         res.status(503).json({
           error: { code: 'NOT_READY', message: 'Service unavailable.' },
           requestId: req.requestId,
