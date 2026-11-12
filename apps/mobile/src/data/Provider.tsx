@@ -27,7 +27,10 @@ export async function restoreSession() {
     if (!(await api.restore())) return;
     const user = await api.request<UserDTO>('/me');
     const profile = map.profile(user);
-    liveStore.setState({ profile, onboarded: true, scenario: 'loading' });
+    // Authentication is complete. Keep the account navigable while the local
+    // cache and background sync are restored; screen queries show their own
+    // loading states for data that has not arrived yet.
+    liveStore.setState({ profile, onboarded: true, scenario: 'ready' });
     if (Platform.OS !== 'web') {
       await offlineOwner.set(user.id);
       await storeOfflineProfile(user.id, user);
@@ -80,7 +83,7 @@ export function DataProvider({ children }: PropsWithChildren) {
     publishWidget();
     const networkListener = Network.addNetworkStateListener((state) => {
       const owner = liveStore.getState().profile?.id;
-      if (!state.isConnected || state.isInternetReachable === false) {
+      if (!state.isConnected) {
         session.setState({ offline: true });
         return;
       }

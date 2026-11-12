@@ -26,7 +26,10 @@ let activeSync: Promise<void> | undefined;
 export async function networkAvailable() {
   if (Platform.OS === 'web') return true;
   const state = await Network.getNetworkStateAsync();
-  return state.isConnected === true && state.isInternetReachable !== false;
+  // A local API (including an Android USB reverse tunnel) can be reachable
+  // even when Android reports that general internet access is unavailable.
+  // Let the actual API request determine reachability.
+  return state.isConnected === true;
 }
 
 async function requestJson<T>(path: string) {

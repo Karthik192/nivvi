@@ -402,7 +402,9 @@ export async function authenticate(
     ...(previous === value.user.id ? {} : empty),
     profile: map.profile(value.user),
     onboarded: true,
-    scenario: previous === value.user.id ? 'ready' : 'loading',
+    // Do not gate the whole account behind the first sync. Each data screen
+    // already has a scoped loading state and can render as sync proceeds.
+    scenario: 'ready',
     notice: '',
   });
   session.setState({ expired: false, offline: false });
