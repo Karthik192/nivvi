@@ -4,7 +4,7 @@
 
 Build an original India-first personal finance companion with premium, accessible UI and an encouraging mascot. Default INR, manual capture only; recording UPI as metadata is not payment integration. Never copy Duolingo characters, branding or assets.
 
-Current state: Phases 0–8 have initial implementations/reviews; Phase 9 QA/security review is in progress and its acceptance gate remains open. See the phase review documents for verification and limits. The widget itself remains unverified in a launcher. Phase 8 passed an emulator smoke review, but real mid-range phone performance, animation timing and TalkBack review remain outstanding. Live API mode is the default; mock preview is selectable only in development. Original Rive assets remain pending. This file is intended for Claude Code and other contributors; it does not imply a particular agent is installed.
+Current state: Phase 9 QA/security findings remain open and Phase 10 release preparation is under review; no production environment or release signing credentials are configured. See the phase review documents for verification and limits. The widget itself remains unverified in a launcher. Phase 8 passed an emulator smoke review, but real mid-range phone performance, animation timing and TalkBack review remain outstanding. Live API mode is the default; mock preview is selectable only in development. Original Rive assets remain pending. This file is intended for Claude Code and other contributors; it does not imply a particular agent is installed.
 
 Read these proposals before implementation:
 

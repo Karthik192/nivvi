@@ -9,6 +9,9 @@ export function readEnvironment(input: {
     throw new Error('APP_VARIANT must be development or production.');
   }
   const apiBaseUrl = input.EXPO_PUBLIC_API_BASE_URL?.trim() || null;
+  if (environment === 'production' && !apiBaseUrl) {
+    throw new Error('Production builds require EXPO_PUBLIC_API_BASE_URL.');
+  }
   if (apiBaseUrl) {
     const url = new URL(apiBaseUrl);
     if (

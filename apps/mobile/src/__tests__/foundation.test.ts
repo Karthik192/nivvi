@@ -9,6 +9,7 @@ describe('environment boundary', () => {
   });
   it('rejects unknown environments, insecure production URLs and embedded credentials', () => {
     expect(() => readEnvironment({ APP_VARIANT: 'staging' })).toThrow();
+    expect(() => readEnvironment({ APP_VARIANT: 'production' })).toThrow();
     expect(() =>
       readEnvironment({
         APP_VARIANT: 'production',
